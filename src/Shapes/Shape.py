@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from .Pose import Pose
+from src.Pose import Pose
 
 
 class Shape:

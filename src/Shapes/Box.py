@@ -1,5 +1,5 @@
 
-from ..Shape import Shape
+from src.Shapes.Shape import Shape
 
 
 class Box(Shape):
