@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+import numpy as np
+from scipy.spatial.transform import Rotation as R
+
 
 class Pose:
 
@@ -10,4 +13,30 @@ class Pose:
         self.roll = roll
         self.pitch = pitch
         self.yaw = yaw
+
+    @staticmethod
+    def makeTranformfromPose(p):
+        """
+        given a pose object, create the transformation matrix
+        :param pose: [Pose] pose object
+        :return: [np.matix 4x4] transformation matrix
+        """
+
+        T = np.zeros([4, 4])     # empty transformation matrix
+
+        eulers = np.array([p.roll, p.pitch, p.yaw])     # euler angles
+
+        rot = R.from_euler('xyz', eulers)
+
+        # assemble transformation matrix
+        T[0:3, 0:3] = rot.as_matrix()
+        T[0, 3] = p.x
+        T[1, 3] = p.y
+        T[2, 3] = p.z
+        T[3, 3] = 1
+
+        return T
+
+
+
 

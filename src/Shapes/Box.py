@@ -1,6 +1,7 @@
 import copy
 from src.Shapes.Shape import Shape
 from src.Grasp import Grasp
+from src.Pose import Pose
 
 
 
