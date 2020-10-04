@@ -39,12 +39,12 @@ class Pose:
 
     @staticmethod
     def makePoseFromTransform(T):
-        '''
+        """
         Converts transformation matrix to a Pose with xyz euler angles. Assumes the passed in transform is a valid
         transformation matrix
         :param T: [np.matrix 4x4] Transformation Matrix
         :return: [Pose] Pose object
-        '''
+        """
         r = R.from_matrix(T[0:3, 0:3])
         euler_vec = r.as_euler('xyz')
         pose = Pose(T[0][3], T[1][3], T[2][3], euler_vec[0], euler_vec[1], euler_vec[2])
