@@ -42,54 +42,94 @@ class Cone(Shape):
         hypot = np.sqrt((self.height**2 + self.radius**2))
 
         # Side Grasp
+        sideGrasps = self.getSideGrasps(graspParams,surfaceOffset);
+        graspList.append(sideGrasps)
+
+        # End Grasp
+        endGrasps = self.getEndGrasps(graspParams,surfaceOffset)
+        graspList.append(endGrasps)
+
+        # Edge Grasp
+        edgeGrasps = self.getEdgeGrasps(graspParams,surfaceOffset)
+        graspList.append(edgeGrasps)
+
+
+        return graspList
+
+    def getSideGrasps(self, graspParams, surfaceOffset=0.1):
+        """
+        Generate the grasps for grabbing a cone from its side
+        :param graspParams:[array 1x4] Grasp parameters associated with creating grasps
+        :param surfaceOffset:[double] Distance to start the grasp away from the surface
+        :return: [list<Grasp>] A list of grasps
+        """
+        parallelPlanes = graspParams[0]  # this number should be odd
+        divisionsOf360 = graspParams[1]
+        grasp180Rotations = graspParams[3]
+
+        graspList = []
+        theta = math.atan(self.height / self.radius)
+        # hypotenuse of height and radius of cone
+        hypot = np.sqrt((self.height ** 2 + self.radius ** 2))
+
+        # Side Grasp
         rotation = 0
         for i in range(divisionsOf360):
             # Rotation about the central axis of the object for divisions of 360
             rotZMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, 0, rotation))
             divisionsMatrix = np.matmul(Pose.makeTranformfromPose(self.originPose), rotZMatrix)
 
-            rotation += 2*np.pi/divisionsOf360
+            rotation += 2 * np.pi / divisionsOf360
             if parallelPlanes > 1:  # divide hypotenuse by number of parallel planes and start at bottom of cone
-                planarTranslation = -hypot/4  # this is because center of mass is 1/4 of the height not half
+                planarTranslation = -hypot / 4  # this is because center of mass is 1/4 of the height not half
             else:
-                planarTranslation = hypot/4  # make sure the location doesn't move center of object hypotenuse
+                planarTranslation = hypot / 4  # make sure the location doesn't move center of object hypotenuse
             for j in range(parallelPlanes):
                 # First translate along the x axis to reach the slope
                 # center of mass is 1/4 of the height for a cone; using similar triangles to find distance to translate
-                transXMatrix = Pose.makeTranformfromPose(Pose(3/4*self.radius,0,0,0,0,0))
-                slopeMatrix = np.matmul(divisionsMatrix,transXMatrix)
+                transXMatrix = Pose.makeTranformfromPose(Pose(3 / 4 * self.radius, 0, 0, 0, 0, 0))
+                slopeMatrix = np.matmul(divisionsMatrix, transXMatrix)
                 # Rotate about y axis by pi-theta to have the x axis perpendicular to slope
-                rotYMatrix = Pose.makeTranformfromPose(Pose(0,0,0,0,-(np.pi-theta),0))
-                slopeMatrix = np.matmul(slopeMatrix,rotYMatrix)
+                rotYMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, -(np.pi - theta), 0))
+                slopeMatrix = np.matmul(slopeMatrix, rotYMatrix)
 
                 # Align Z axis to be approach vector into cone
-                rotYMatrix = Pose.makeTranformfromPose(Pose(0,0,0,0,-np.pi,0))
-                slopeMatrix = np.matmul(slopeMatrix,rotYMatrix)
+                rotYMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, -np.pi, 0))
+                slopeMatrix = np.matmul(slopeMatrix, rotYMatrix)
                 # Align X axis to be perpendicular to z axis and central axis
-                rotZMatrix = Pose.makeTranformfromPose(Pose(0,0,0,0,0,-np.pi/2))
+                rotZMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, 0, -np.pi / 2))
                 slopeMatrix = np.matmul(slopeMatrix, rotZMatrix)
                 # Have frame leave surface of object
-                transZMatrix = Pose.makeTranformfromPose(Pose(0,0,-surfaceOffset,0,0,0))
-                slopeMatrix = np.matmul(slopeMatrix,transZMatrix)
+                transZMatrix = Pose.makeTranformfromPose(Pose(0, 0, -surfaceOffset, 0, 0, 0))
+                slopeMatrix = np.matmul(slopeMatrix, transZMatrix)
 
                 # Perform the parallel plane translation
-                transZMatrix = Pose.makeTranformfromPose(Pose(0,0,planarTranslation,0,0,0))
-                parallelPlaneMatrix = np.matmul(slopeMatrix,transZMatrix)
+                transZMatrix = Pose.makeTranformfromPose(Pose(0, 0, planarTranslation, 0, 0, 0))
+                parallelPlaneMatrix = np.matmul(slopeMatrix, transZMatrix)
 
                 if parallelPlanes > 1:
-                    planarTranslation += hypot/(parallelPlanes-1)
+                    planarTranslation += hypot / (parallelPlanes - 1)
                 wristRotation = 0
                 for k in range(grasp180Rotations):
                     # Rotate about the approach vector which should now be the z axis
                     rotZMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, 0, wristRotation))
-                    graspMatrix = np.matmul(parallelPlaneMatrix,rotZMatrix)
+                    graspMatrix = np.matmul(parallelPlaneMatrix, rotZMatrix)
                     wristRotation += np.pi
 
                     # Add to list
                     graspList.append(Grasp('cylindrical', Pose.makePoseFromTransform(graspMatrix)))
-                    pass
 
-        # End Grasp
+        return graspList
+
+    def getEndGrasps(self,graspParams,surfaceOffset=0.1):
+        """
+        Generate the grasps for grabbing a cone from the bottom or top end
+        :param graspParams:[array 1x4] Grasp parameters associated with creating grasps
+        :param surfaceOffset:[double] Distance to start the grasp away from the surface
+        :return: [list<Grasp>] A list of grasps
+        """
+        graspRotations = graspParams[2]
+        graspList = []
         for i in range(2):
             # rotation about the y axis only if i == 1
             rotYMatrix = Pose.makeTranformfromPose(Pose(0,0,0,0,i*np.pi,0))
@@ -108,9 +148,23 @@ class Cone(Shape):
 
                 # Add Grasp to list
                 graspList.append(Grasp('spherical', Pose.makePoseFromTransform(graspMatrix)))
+        return graspList
 
+    def getEdgeGrasps(self,graspParams,surfaceOffset=0.1):
+        """
+        Generating grasps for grabbing a cone by its bottom edge
+        :param graspParams:[array 1x4] Grasp parameters associated with creating grasps
+        :param surfaceOffset:[double] Distance to start the grasp away from the surface
+        :return: [list<Grasp>] A list of grasps
+        """
+        divisionsOf360 = graspParams[1]
+        grasp180Rotations = graspParams[3]
 
-        # Edge Grasp
+        graspList = []
+        theta = math.atan(self.height / self.radius)
+        # hypotenuse of height and radius of cone
+        hypot = np.sqrt((self.height ** 2 + self.radius ** 2))
+
         # translate along negative Z axis to bring the grasp out of the bottom surface of object
         transZMatrix = Pose.makeTranformfromPose(Pose(0, 0, -(self.height / 4), 0, 0, 0))
         endMatrix = np.matmul(Pose.makeTranformfromPose(self.originPose), transZMatrix)
@@ -120,20 +174,20 @@ class Cone(Shape):
             rotZMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, 0, rotation))
             divisionsMatrix = np.matmul(endMatrix, rotZMatrix)
             # Translate to outer radius of cone
-            transXMatrix = Pose.makeTranformfromPose(Pose(self.radius,0,0,0,0,0))
+            transXMatrix = Pose.makeTranformfromPose(Pose(self.radius, 0, 0, 0, 0, 0))
             edgeMatrix = np.matmul(divisionsMatrix, transXMatrix)
             # Fix approach vector
-            rotYMatrix = Pose.makeTranformfromPose(Pose(0,0,0,0,-(np.pi-theta),0))
-            edgeMatrix = np.matmul(edgeMatrix,rotYMatrix)
+            rotYMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, -(np.pi - theta), 0))
+            edgeMatrix = np.matmul(edgeMatrix, rotYMatrix)
             # Align x vector
-            rotZMatrix = Pose.makeTranformfromPose(Pose(0,0,0,0,0,-np.pi/2))
+            rotZMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, 0, -np.pi / 2))
             edgeMatrix = np.matmul(edgeMatrix, rotYMatrix)
             # move surface offset away from object
-            transZMatrix = Pose.makeTranformfromPose(Pose(0,0,-surfaceOffset,0,0,0));
+            transZMatrix = Pose.makeTranformfromPose(Pose(0, 0, -surfaceOffset, 0, 0, 0));
             edgeMatrix = np.matmul(edgeMatrix, transZMatrix)
 
-            wristRotation += 2*np.pi/divisionsOf360
-            graspRotation = 0
+            rotation += 2 * np.pi / divisionsOf360
+            wristRotation = 0
             for j in range(grasp180Rotations):
                 # Rotate about the z axis for plan the set of grasps
                 rotZMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, 0, wristRotation))
@@ -144,6 +198,4 @@ class Cone(Shape):
 
                 # Add Grasp to list
                 graspList.append(Grasp('cylindrical', Pose.makePoseFromTransform(graspMatrix)))
-
-
         return graspList

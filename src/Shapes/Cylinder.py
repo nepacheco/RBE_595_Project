@@ -107,10 +107,10 @@ class Cylinder(Shape):
 
     def getEndGrasps(self,graspParams, surfaceOffset=0.1):
         """
-        
-        :param graspParams:
-        :param surfaceOffset:
-        :return:
+        Generate the grasps for grabbing a cylinder by either end
+        :param graspParams:[array 1x4] Grasp parameters associated with creating grasps
+        :param surfaceOffset:[double] Distance to start the grasp away from the surface
+        :return: [list<Grasp>] A list of grasps
         """
         graspList = []
         graspRotations = graspParams[2]
