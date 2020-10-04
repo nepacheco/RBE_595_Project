@@ -10,8 +10,7 @@ class Shape:
 
     def __init__(self, originPose = Pose()):
         self.originPose = originPose
-
-
+        self.transformation = Pose.makeTranformfromPose(originPose)
 
     def planGrasps(self, graspParams):
         return
@@ -25,7 +24,9 @@ class Shape:
         :param p: [np.array] (x, y, z) position vector
         :return: [np.array] (x', y', z') transformed position vector
         """
-
+        vec = np.vstack(np.append(p, [1]))  # add 1 to end and make vertical
+        newvec = self.transformation.dot(vec)
+        return newvec[0:3]
 
 
     def makeMesh(self):
