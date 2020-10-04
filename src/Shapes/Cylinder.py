@@ -33,7 +33,10 @@ class Cylinder(Shape):
 
         graspList = []
         # Side Grasps
-        graspTranslation = -self.height/2
+        if (parallelPlanes > 1):
+            graspTranslation = -self.height/2
+        else:
+            graspTranslation = 0
         for i in range(parallelPlanes):
             # Translation along the objects central axis (z axis) for height placement of grasp
             translationMatrix = Pose.makeTranformfromPose(Pose(0,0,graspTranslation,0,0,0))
