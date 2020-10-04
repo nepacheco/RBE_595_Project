@@ -1,12 +1,19 @@
 # Script for testing
 
 import numpy as np
+from src.Shapes.Cylinder import Cylinder
 import math
 from math import pi
 from src.Pose import Pose
 from src.Grasp import Grasp
 
-x = Pose(1, 2, 3, pi/2, 0, 0)
+#
 
-t = Pose.makeTranformfromPose(x)
-print(t)
+
+
+def testCylinderGraspLocations():
+    cylinder = Cylinder(Pose(0,0,0,0,0,0),10,1)
+    grasps = cylinder.planGrasps([1,1,1,1])
+    print(grasps)
+
+testCylinderGraspLocations()
