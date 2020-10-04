@@ -27,7 +27,7 @@ class Cylinder(Shape):
         1. # of divisions of 360 degrees
         2. # of grasp rotations
         3. # of 180 degree rotations
-        :return: [array of Grasp Objects] List of grasp objects 
+        :return: [array of Grasp Objects] List of grasp objects
         """
         surfaceOffset = 0.1
         parallelPlanes = graspParams[0]  # this number should be odd
@@ -37,17 +37,19 @@ class Cylinder(Shape):
 
         graspList = []
         # Side Grasps
-        if parallelPlanes > 1:
+        if parallelPlanes > 1: # set the initial height at the bottom of cyliner
             graspTranslation = -self.height/2
-        else:
+        else: # set initial height at center of mass
             graspTranslation = 0
+
         for i in range(parallelPlanes):
             # Translation along the objects central axis (z axis) for height placement of grasp
             translationMatrix = Pose.makeTranformfromPose(Pose(0,0,graspTranslation,0,0,0))
             parallelMatrix = np.matmul(Pose.makeTranformfromPose(self.originPose),translationMatrix)
 
             #increment GraspTranslation and set grasp rotation
-            graspTranslation += self.height/parallelPlanes
+            if parallelPlanes > 1:  # don't divide by 0
+                graspTranslation += self.height/(parallelPlanes-1)
             graspRotation = 0
             for j in range(divisionsOf360):
                 # Rotation about the objects central axis (z axis) for rotation placement of grasp
