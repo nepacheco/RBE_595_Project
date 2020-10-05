@@ -78,7 +78,7 @@ class Sphere(Shape):
 
         # Create a new plot
         figure = plt.figure()
-        axes = mplot3d.Axes3D(figure)
+        ax = mplot3d.Axes3D(figure)
 
         # move to origin scale points by dimensions
         vecs = sphere.vectors
@@ -94,11 +94,15 @@ class Sphere(Shape):
                 vecs[f, v, :] = np.hstack(transformed_p)
 
         # Load the STL files and add the vectors to the plot
-        axes.add_collection3d(mplot3d.art3d.Poly3DCollection(sphere.vectors, edgecolor='k'))
+        ax.add_collection3d(mplot3d.art3d.Poly3DCollection(sphere.vectors))
 
         # scale plot and add labels
         scale = sphere.points.flatten()
-        axes.auto_scale_xyz(scale, scale, scale)
-        axes.set_xlabel('X (mm)')
-        axes.set_ylabel('Y (mm)')
-        axes.set_zlabel('Z (mm)')
+        ax.auto_scale_xyz(scale, scale, scale)
+        ax.set_xlabel('X (mm)')
+        ax.set_ylabel('Y (mm)')
+        ax.set_zlabel('Z (mm)')
+
+        ax.quiver(0, 0, 0, 1, 1, 1, length=.1)
+
+        return ax
