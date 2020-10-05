@@ -1,17 +1,16 @@
 import copy
-from src.Shapes.Shape import Shape
+from src.Shapes.Shape import *
 from src.Grasp import Grasp
 from src.Pose import Pose
 
 
-
 class Box(Shape):
 
-    def __init__(self):
-        super().__init__()
-        self.height = 0
-        self.width = 0
-        self.length = 0
+    def __init__(self, h=0, w=0, l=0, pose=Pose()):
+        super().__init__(pose)
+        self.height = h
+        self.width = w
+        self.length = l
 
     # This function was formed assuming
     # Z
@@ -159,4 +158,42 @@ class Box(Shape):
 
         return listOfGrasps
 
+    def makeMesh(self):
+        """
+        creates the mesh grid for a box for the 3d plot by:
+         1) creating the object in a 2D plane at the origin
+         2) extruding by the z to get height
+         3) subtract from z the offset for the centroid
+         3) transforming to the object frame
+        :return: coords [np.array] (x, y, z)
+        """
 
+        # display figure and get axes
+        box = mesh.Mesh.from_file('STLs/cube.STL')
+
+        # Create a new plot
+        figure = plt.figure()
+        axes = mplot3d.Axes3D(figure)
+
+        # move to origin scale points by dimensions
+        vecs = box.vectors
+        vecs[:, :, 0] = (vecs[:, :, 0] - 0.5) * self.length
+        vecs[:, :, 1] = (vecs[:, :, 1] - 0.5) * self.width
+        vecs[:, :, 2] = (vecs[:, :, 2] - 0.5) * self.height
+
+        # tranform each point based to based on orientation
+        for f in range(vecs.shape[0]):
+            for v in range(vecs.shape[1]):
+                p = vecs[f, v, :]
+                transformed_p = self.applyTransform(p)
+                vecs[f, v, :] = np.hstack(transformed_p)
+
+        # Load the STL files and add the vectors to the plot
+        axes.add_collection3d(mplot3d.art3d.Poly3DCollection(box.vectors, edgecolor='k'))
+
+        # scale plot and add labels
+        scale = box.points.flatten()
+        axes.auto_scale_xyz(scale, scale, scale)
+        axes.set_xlabel('X (mm)')
+        axes.set_ylabel('Y (mm)')
+        axes.set_zlabel('Z (mm)')
