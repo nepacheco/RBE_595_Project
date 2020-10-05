@@ -6,7 +6,7 @@ from src.Pose import Pose
 
 class Box(Shape):
 
-    def __init__(self, h=0, w=0, l=0, pose=Pose()):
+    def __init__(self, pose=Pose(), h=0, w=0, l=0):
         super().__init__(pose)
         self.height = h
         self.width = w
@@ -161,11 +161,10 @@ class Box(Shape):
     def makeMesh(self):
         """
         creates the mesh grid for a box for the 3d plot by:
-         1) creating the object in a 2D plane at the origin
-         2) extruding by the z to get height
-         3) subtract from z the offset for the centroid
-         3) transforming to the object frame
-        :return: coords [np.array] (x, y, z)
+         1) importing unit shape stl
+         2) translating stl to origin and scale by the respective properties
+         3) transform all points by shape pose
+        :return: axes
         """
 
         # display figure and get axes
