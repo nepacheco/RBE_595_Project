@@ -6,10 +6,12 @@ from scipy.spatial.transform import Rotation as R
 
 class Pose:
 
-    def __init__(self,x=0,y=0,z=0,roll=0,pitch=0,yaw=0):
+    def __init__(self, x=0, y=0, z=0, roll=0, pitch=0, yaw=0):
         self.x = x
         self.y = y
         self.z = z
+
+        # in radians
         self.roll = roll
         self.pitch = pitch
         self.yaw = yaw
@@ -22,11 +24,11 @@ class Pose:
         :return: [np.matix 4x4] transformation matrix
         """
 
-        T = np.zeros([4, 4])     # empty transformation matrix
+        T = np.zeros([4, 4])     # init empty transformation matrix
 
-        eulers = np.array([p.roll, p.pitch, p.yaw])     # euler angles
+        eulers = np.array([p.roll, p.pitch, p.yaw])     # euler array
 
-        rot = R.from_euler('xyz', eulers)
+        rot = R.from_euler('xyz', eulers)       # create rotation matrix from euler angles
 
         # assemble transformation matrix
         T[0:3, 0:3] = rot.as_matrix()
