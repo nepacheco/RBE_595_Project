@@ -181,21 +181,19 @@ class Box(Shape):
         vecs[:, :, 1] = (vecs[:, :, 1] - 0.5) * self.width
         vecs[:, :, 2] = (vecs[:, :, 2] - 0.5) * self.height
 
+        # tranform each point based to based on orientation
         for f in range(vecs.shape[0]):
             for v in range(vecs.shape[1]):
                 p = vecs[f, v, :]
-                print(p.shape)
                 transformed_p = self.applyTransform(p)
-                print(transformed_p)
                 vecs[f, v, :] = np.hstack(transformed_p)
 
         # Load the STL files and add the vectors to the plot
         axes.add_collection3d(mplot3d.art3d.Poly3DCollection(box.vectors, edgecolor='k'))
 
+        # scale plot and add labels
         scale = box.points.flatten()
         axes.auto_scale_xyz(scale, scale, scale)
         axes.set_xlabel('X (mm)')
         axes.set_ylabel('Y (mm)')
         axes.set_zlabel('Z (mm)')
-
-        plt.show()
