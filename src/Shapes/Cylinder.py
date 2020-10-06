@@ -20,7 +20,7 @@ class Cylinder(Shape):
     # |
     # |_____X
     # and Y going into the plane
-    def planGrasps(self, graspParams):
+    def planGrasps(self, graspParams, surfaceOffset=1):
         """
         Create each grasp assuming the origin of the shape is the global origin, and then multiply the grasp Pose by the
         transformation matrix to put the grasp location in the global frame
@@ -31,7 +31,6 @@ class Cylinder(Shape):
         3. # of 180 degree rotations
         :return: [array of Grasp Objects] List of grasp objects
         """
-        surfaceOffset = 0.1
         parallelPlanes = graspParams[0]  # this number should be odd
         divisionsOf360 = graspParams[1]
         graspRotations = graspParams[2]  # value should not be 3
@@ -70,10 +69,11 @@ class Cylinder(Shape):
             # Translation along the objects central axis (z axis) for height placement of grasp
             translationMatrix = Pose.makeTranformfromPose(Pose(0, 0, graspTranslation, 0, 0, 0))
             parallelMatrix = np.matmul(Pose.makeTranformfromPose(self.originPose), translationMatrix)
-
+            print(i)
             # increment GraspTranslation and set grasp rotation
             if parallelPlanes > 1:  # don't divide by 0
                 graspTranslation += self.height / (parallelPlanes - 1)
+
             graspRotation = 0
             for j in range(divisionsOf360):
                 # Rotation about the objects central axis (z axis) for rotation placement of grasp
@@ -83,14 +83,14 @@ class Cylinder(Shape):
                 # increment grasp rotation and set wrist rotation
                 graspRotation += 2 * np.pi / divisionsOf360
                 wristRotation = 0
-                for k in range(grasp180Rotations):
+                for k in range(2*grasp180Rotations):
                     # These three transformation matrices move the frame of the grasp outside the object.
                     # Additional it guarantees that the z axis of the frame points towards the object (approach vector)
                     # and that the x axis is perpendicular to the central axis and the approach vector to achieve the
                     # thumb vector
                     transXMatrix = Pose.makeTranformfromPose(Pose(self.radius + surfaceOffset, 0, 0, 0, 0, 0))
                     rotYMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, -np.pi / 2, 0))
-                    rotZMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, 0, np.pi / 2))
+                    rotZMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, 0, -np.pi / 2))
 
                     # multiplication of the transformation matrices
                     graspMatrix = np.matmul(divisionsMatrix, transXMatrix)
@@ -100,11 +100,11 @@ class Cylinder(Shape):
                     # Rotate about the approach vector (our z axis) if we need to
                     rotZMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, 0, wristRotation))
                     graspMatrix = np.matmul(graspMatrix, rotZMatrix)
-                    wristRotation += np.pi
+                    wristRotation += np.pi/2
 
                     # Add object to grasp list as a Pose not a matrix
                     graspList.append(Grasp('cylindrical', Pose.makePoseFromTransform(graspMatrix)))
-            return graspList
+        return graspList
 
 
     def getEndGrasps(self,graspParams, surfaceOffset=0.1):
