@@ -29,10 +29,11 @@ def testConeGraspLocations():
 # testConeGraspLocations()
 
 p0 = Pose(0, 0, 0, 0, 0, 0)
-m = Cone(p0, 1, 1)
-
+m = Sphere(p0, 1)
 ax = m.makeMesh()
-grasps = [Grasp(pose=Pose(1,2,4,0,0,0)), Grasp(pose=Pose(1,1,2,0, 0,0))]
+
+grasps = m.planGrasps([5, 5, 5, 5], 1)
+print(grasps)
 m.visualizeGrasps(ax, grasps)
 plt.show()
 

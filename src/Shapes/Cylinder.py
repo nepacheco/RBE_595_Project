@@ -40,11 +40,11 @@ class Cylinder(Shape):
         graspList = []
         # Side Grasps
         sideGrasps = self.getSideGrasps(graspParams,surfaceOffset)
-        graspList.append(sideGrasps)
+        graspList = graspList + sideGrasps
 
         # End Grasps
         endGrasps = self.getEndGrasps(graspParams,surfaceOffset)
-        graspList.append(endGrasps)
+        graspList = graspList + endGrasps
 
         return graspList
 

@@ -145,3 +145,5 @@ class Box(Shape):
         axes.set_xlabel('X (mm)')
         axes.set_ylabel('Y (mm)')
         axes.set_zlabel('Z (mm)')
+
+        return axes
