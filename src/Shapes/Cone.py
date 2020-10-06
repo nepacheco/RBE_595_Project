@@ -82,7 +82,7 @@ class Cone(Shape):
             if parallelPlanes > 1:  # divide hypotenuse by number of parallel planes and start at bottom of cone
                 planarTranslation = -hypot / 4  # this is because center of mass is 1/4 of the height not half
             else:
-                planarTranslation = hypot / 4  # make sure the location doesn't move center of object hypotenuse
+                planarTranslation = hypot / 2  # make sure the location doesn't move center of object hypotenuse
             for j in range(parallelPlanes):
                 # First translate along the x axis to reach the slope
                 # center of mass is 1/4 of the height for a cone; using similar triangles to find distance to translate
@@ -109,11 +109,11 @@ class Cone(Shape):
                 if parallelPlanes > 1:
                     planarTranslation += hypot / (parallelPlanes - 1)
                 wristRotation = 0
-                for k in range(grasp180Rotations):
+                for k in range(2*grasp180Rotations):
                     # Rotate about the approach vector which should now be the z axis
                     rotZMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, 0, wristRotation))
                     graspMatrix = np.matmul(parallelPlaneMatrix, rotZMatrix)
-                    wristRotation += np.pi
+                    wristRotation += np.pi/2
 
                     # Add to list
                     graspList.append(Grasp('cylindrical', Pose.makePoseFromTransform(graspMatrix)))
@@ -134,8 +134,8 @@ class Cone(Shape):
             rotYMatrix = Pose.makeTranformfromPose(Pose(0,0,0,0,i*np.pi,0))
             interMatrix = np.matmul(Pose.makeTranformfromPose(self.originPose),rotYMatrix)
             # translate along negative Z axis to bring the grasp out of the object
-            transZMatrix = Pose.makeTranformfromPose(Pose(0, 0, -abs(i - self.height / 4 + surfaceOffset), 0, 0, 0))
-            endMatrix = np.matmul(Pose.makeTranformfromPose(self.originPose), transZMatrix)
+            transZMatrix = Pose.makeTranformfromPose(Pose(0, 0, -abs(i*self.height - self.height / 4) - surfaceOffset, 0, 0, 0))
+            endMatrix = np.matmul(interMatrix, transZMatrix)
             wristRotation = 0
             for j in range(graspRotations):
                 # Rotate about the z axis for plan the set of grasps
