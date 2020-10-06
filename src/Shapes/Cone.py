@@ -219,9 +219,9 @@ class Cone(Shape):
 
         # move to origin scale points by dimensions
         vecs = sphere.vectors
-        vecs[:, :, 0] = (vecs[:, :, 0] - 0.5) * self.radius
-        vecs[:, :, 1] = (vecs[:, :, 1] - 0.5) * self.radius
-        vecs[:, :, 2] = (vecs[:, :, 2] - 0.5) * self.height
+        vecs[:, :, 0] = (vecs[:, :, 0] - 1) * self.radius
+        vecs[:, :, 1] = (vecs[:, :, 1] - 1) * self.radius
+        vecs[:, :, 2] = (vecs[:, :, 2] - 0.25) * self.height
 
         # tranform each point based to based on orientation
         for f in range(vecs.shape[0]):

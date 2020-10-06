@@ -173,11 +173,10 @@ class Cylinder(Shape):
 
         # scale plot and add labels
         scale = sphere.points.flatten()
-        ax.auto_scale_xyz(scale, scale, scale)
+        # ax.auto_scale_xyz(scale, scale, scale)
+        ax.set_aspect('equal')
         ax.set_xlabel('X (mm)')
         ax.set_ylabel('Y (mm)')
         ax.set_zlabel('Z (mm)')
-
-        ax.quiver(0, 0, 0, 1, 1, 1, length=.1)
 
         return ax

@@ -88,5 +88,6 @@ class Shape:
         # print(colormap[c]) 
         # print(cm)
         ax.quiver(q[:,0], q[:,1], q[:,2], q[:,3], q[:,4], q[:,5], color='r', length=0.5)
+        # axis('equal')
 
         return
