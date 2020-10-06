@@ -19,7 +19,7 @@ class Cone(Shape):
     # |
     # |_____X
     # and Y going into the plane
-    def planGrasps(self, graspParams):
+    def planGrasps(self, graspParams,surfaceOffset = 1):
         """
         Create each grasp assuming the origin of the shape is the global origin, and then multiply the grasp Pose by the
         transformation matrix to put the grasp location in the global frame
@@ -30,7 +30,6 @@ class Cone(Shape):
         3. # of 180 degree rotations
         :return: [array of Grasp Objects] List of grasp objects
         """
-        surfaceOffset = 0.1
         parallelPlanes = graspParams[0]  # this number should be odd
         divisionsOf360 = graspParams[1]
         graspRotations = graspParams[2]  # value should not be 3
@@ -43,15 +42,15 @@ class Cone(Shape):
 
         # Side Grasp
         sideGrasps = self.getSideGrasps(graspParams,surfaceOffset);
-        graspList.append(sideGrasps)
+        graspList += sideGrasps
 
         # End Grasp
         endGrasps = self.getEndGrasps(graspParams,surfaceOffset)
-        graspList.append(endGrasps)
+        graspList += endGrasps
 
         # Edge Grasp
         edgeGrasps = self.getEdgeGrasps(graspParams,surfaceOffset)
-        graspList.append(edgeGrasps)
+        graspList += edgeGrasps
 
 
         return graspList
