@@ -52,7 +52,6 @@ class Cone(Shape):
         edgeGrasps = self.getEdgeGrasps(graspParams,surfaceOffset)
         graspList += edgeGrasps
 
-
         return graspList
 
     def getSideGrasps(self, graspParams, surfaceOffset=0.1):
@@ -82,18 +81,18 @@ class Cone(Shape):
             if parallelPlanes > 1:  # divide hypotenuse by number of parallel planes and start at bottom of cone
                 planarTranslation = -hypot / 4  # this is because center of mass is 1/4 of the height not half
             else:
-                planarTranslation = hypot / 2  # make sure the location doesn't move center of object hypotenuse
+                planarTranslation = hypot / 4  # make sure the location doesn't move center of object hypotenuse
             for j in range(parallelPlanes):
                 # First translate along the x axis to reach the slope
                 # center of mass is 1/4 of the height for a cone; using similar triangles to find distance to translate
                 transXMatrix = Pose.makeTranformfromPose(Pose(3 / 4 * self.radius, 0, 0, 0, 0, 0))
                 slopeMatrix = np.matmul(divisionsMatrix, transXMatrix)
-                # Rotate about y axis by pi-theta to have the x axis perpendicular to slope
-                rotYMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, -(np.pi - theta), 0))
+                # Rotate about y axis by pi/2-theta to have the x axis perpendicular to slope
+                rotYMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, -(np.pi/2 - theta), 0))
                 slopeMatrix = np.matmul(slopeMatrix, rotYMatrix)
 
                 # Align Z axis to be approach vector into cone
-                rotYMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, -np.pi, 0))
+                rotYMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, -np.pi/2, 0))
                 slopeMatrix = np.matmul(slopeMatrix, rotYMatrix)
                 # Align X axis to be perpendicular to z axis and central axis
                 rotZMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, 0, -np.pi / 2))
@@ -103,7 +102,7 @@ class Cone(Shape):
                 slopeMatrix = np.matmul(slopeMatrix, transZMatrix)
 
                 # Perform the parallel plane translation
-                transZMatrix = Pose.makeTranformfromPose(Pose(0, 0, planarTranslation, 0, 0, 0))
+                transZMatrix = Pose.makeTranformfromPose(Pose(0, planarTranslation, 0, 0, 0, 0))
                 parallelPlaneMatrix = np.matmul(slopeMatrix, transZMatrix)
 
                 if parallelPlanes > 1:
@@ -176,24 +175,24 @@ class Cone(Shape):
             transXMatrix = Pose.makeTranformfromPose(Pose(self.radius, 0, 0, 0, 0, 0))
             edgeMatrix = np.matmul(divisionsMatrix, transXMatrix)
             # Fix approach vector
-            rotYMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, -(np.pi - theta), 0))
+            rotYMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, -(np.pi/2 - theta), 0))
             edgeMatrix = np.matmul(edgeMatrix, rotYMatrix)
             # Align x vector
             rotZMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, 0, -np.pi / 2))
-            edgeMatrix = np.matmul(edgeMatrix, rotYMatrix)
+            edgeMatrix = np.matmul(edgeMatrix, rotZMatrix)
             # move surface offset away from object
-            transZMatrix = Pose.makeTranformfromPose(Pose(0, 0, -surfaceOffset, 0, 0, 0));
+            transZMatrix = Pose.makeTranformfromPose(Pose(0, 0, -surfaceOffset, 0, 0, 0))
             edgeMatrix = np.matmul(edgeMatrix, transZMatrix)
 
             rotation += 2 * np.pi / divisionsOf360
             wristRotation = 0
-            for j in range(grasp180Rotations):
+            for j in range(2*grasp180Rotations):
                 # Rotate about the z axis for plan the set of grasps
                 rotZMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, 0, wristRotation))
                 graspMatrix = np.matmul(edgeMatrix, rotZMatrix)
 
                 # increment rotation for next loop
-                rotation += np.pi
+                rotation += np.pi/2
 
                 # Add Grasp to list
                 graspList.append(Grasp('cylindrical', Pose.makePoseFromTransform(graspMatrix)))
