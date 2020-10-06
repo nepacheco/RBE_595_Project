@@ -25,7 +25,7 @@ class Cylinder(Shape):
         Create each grasp assuming the origin of the shape is the global origin, and then multiply the grasp Pose by the
         transformation matrix to put the grasp location in the global frame
         :param graspParams: [array 1x4] Array for the 4 grasp parameters;
-        0. # of paraellel planes
+        0. # of parallel planes
         1. # of divisions of 360 degrees
         2. # of grasp rotations
         3. # of 180 degree rotations

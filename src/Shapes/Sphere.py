@@ -15,52 +15,50 @@ class Sphere(Shape):
     # |
     # |_____X
     # and Y going into the plane
-    def planGrasps(self, graspParams):
-        totalGrasps = []
-        divisions = graspParams[1]
-        graspRotations = graspParams[2]
-        palmDistance = 5
+    def planGrasps(self, graspParams, surfaceOffset=100):
+        """
+         Create each grasp assuming the origin of the shape is the global origin, and then multiply the grasp Pose by
+         the transformation matrix to put the grasp location in the global frame
+         :param graspParams: [array 1x4] Array for the 4 grasp parameters;
+         0. # of parallel planes
+         1. # of divisions of 360 degrees
+         2. # of grasp rotations
+         3. # of 180 degree rotations
+         :param surfaceOffset: [double] Distance to start the grasp away from the surface
+         :return: [array of Grasp Objects] List of grasp objects
+         """
+        graspList = []
+        divisionsOf360 = graspParams[1]
+        graspRotations = graspParams[2]  # Should not be a multiple of 3
 
-        #plan starting pose
-        InitialPose = deepcopy(self.originPose)
-        InitialPose.x += self.radius + palmDistance
-
-        azimuth = 0
-        theta = (2*pi)/divisions
+        theta = (2 * np.pi) / divisionsOf360
         phi = (2 * pi) / graspRotations
-        while azimuth < divisions:
-            approachPose = Pose()
-            approachPose.x = -1
-            radius = self.radius + palmDistance
-            InitialPoseH = deepcopy(self.originPose)
-            InitialPoseH.x = radius * cos(azimuth*theta)
-            InitialPoseH.y = radius * sin(azimuth*theta)
-            InitialPoseH.yaw += azimuth*theta
+        outerRadius = self.radius + surfaceOffset
+        for i in range(divisionsOf360):
+            azimuthMatrix = Pose.makeTranformfromPose(Pose(outerRadius * cos(i * theta),
+                                                           outerRadius * sin(i * theta), 0,
+                                                           0, 0, i * theta))
+            parallelMatrix = np.matmul(Pose.makeTranformfromPose(self.originPose), azimuthMatrix)
 
-            rotations = 0
-            while rotations < graspRotations:
-                thumbPoseH = Pose()
-                thumbPoseH.y = 1
-                thumbPoseH.roll = rotations*phi
-                currentGH = Grasp('spherical',InitialPoseH, approachPose, thumbPoseH)
-                totalGrasps.append(currentGH)
+            for j in range(divisionsOf360):
+                elevationMatrix = Pose.makeTranformfromPose(Pose(cos(j * theta), 0,
+                                                                 sin(j * theta), 0,
+                                                                 j * theta, 0))
 
-            elevation = 0
-            while elevation < divisions:
-                InitialPoseV = deepcopy(InitialPoseH)
-                InitialPoseV.x = radius * cos(elevation*theta)
-                InitialPoseV.z = radius * sin(elevation*theta)
-                InitialPoseV.pitch += elevation*theta
-                rotations = 0
-                while rotations < graspRotations:
-                    thumbPoseV = Pose()
-                    thumbPoseV.y = 1
-                    thumbPoseV.roll = rotations * phi
-                    currentGV = Grasp('spherical', InitialPoseV, approachPose, thumbPoseV)
-                    totalGrasps.append(currentGV)
-                elevation += 1
-            azimuth += 1
-        return totalGrasps
+                parallelMatrix = np.matmul(parallelMatrix, elevationMatrix)
+
+                # Offset by 1 so there is no division by 0
+                for k in range(1, graspRotations + 1):
+                    # The following two transforms align the z axis to the center of the object and rotates the
+                    # x axis around the direction of motion a specified amount of times
+                    rotYMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, -np.pi / 2, 0))
+                    rotZMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, 0, (2 * np.pi) / k))
+
+                    graspMatrix = np.matmul(parallelMatrix, rotYMatrix)
+                    graspMatrix = np.matmul(rotZMatrix, graspMatrix)
+                    graspList.append(Grasp('spherical', Pose.makePoseFromTransform(graspMatrix)))
+
+        return graspList
 
     def makeMesh(self):
         """
