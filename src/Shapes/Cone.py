@@ -241,6 +241,4 @@ class Cone(Shape):
         ax.set_ylabel('Y (mm)')
         ax.set_zlabel('Z (mm)')
 
-        ax.quiver(0, 0, 0, 1, 1, 1, length=.1)
-
         return ax

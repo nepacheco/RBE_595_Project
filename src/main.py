@@ -26,12 +26,14 @@ def testConeGraspLocations():
     print(grasps)
 
 # testCylinderGraspLocations()
-testConeGraspLocations()
+# testConeGraspLocations()
 
 p0 = Pose(0, 0, 0, 0, 0, 0)
 m = Cone(p0, 1, 1)
 
 ax = m.makeMesh()
+grasps = [Grasp(pose=Pose(1,2,4,0,0,0)), Grasp(pose=Pose(1,1,2,0, 0,0))]
+m.visualizeGrasps(ax, grasps)
 plt.show()
 
 
