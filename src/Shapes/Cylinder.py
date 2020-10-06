@@ -69,10 +69,11 @@ class Cylinder(Shape):
             # Translation along the objects central axis (z axis) for height placement of grasp
             translationMatrix = Pose.makeTranformfromPose(Pose(0, 0, graspTranslation, 0, 0, 0))
             parallelMatrix = np.matmul(Pose.makeTranformfromPose(self.originPose), translationMatrix)
-
+            print(i)
             # increment GraspTranslation and set grasp rotation
             if parallelPlanes > 1:  # don't divide by 0
                 graspTranslation += self.height / (parallelPlanes - 1)
+
             graspRotation = 0
             for j in range(divisionsOf360):
                 # Rotation about the objects central axis (z axis) for rotation placement of grasp
@@ -103,7 +104,7 @@ class Cylinder(Shape):
 
                     # Add object to grasp list as a Pose not a matrix
                     graspList.append(Grasp('cylindrical', Pose.makePoseFromTransform(graspMatrix)))
-            return graspList
+        return graspList
 
 
     def getEndGrasps(self,graspParams, surfaceOffset=0.1):
