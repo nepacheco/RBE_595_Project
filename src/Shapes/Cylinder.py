@@ -2,6 +2,8 @@ import copy
 from src.Shapes.Shape import Shape
 from ..Pose import Pose
 from src.Grasp import Grasp
+from src.Shapes.Shape import *
+from math import *
 from scipy.spatial.transform import Rotation as R
 import numpy as np
 
@@ -135,3 +137,47 @@ class Cylinder(Shape):
                 # Add Grasp to list
                 graspList.append(Grasp('spherical', Pose.makePoseFromTransform(graspMatrix)))
         return graspList
+
+
+    def makeMesh(self):
+        """
+        creates the mesh grid for a box for the 3d plot by:
+         1) importing unit shape stl
+         2) translating stl to origin and scale by the respective properties
+         3) transform all points by shape pose
+        :return: axes
+        """
+
+        # display figure and get axes
+        sphere = mesh.Mesh.from_file('STLs/cylinder.STL')
+
+        # Create a new plot
+        figure = plt.figure()
+        ax = mplot3d.Axes3D(figure)
+
+        # move to origin scale points by dimensions
+        vecs = sphere.vectors
+        vecs[:, :, 0] = (vecs[:, :, 0] - 0.5) * self.radius
+        vecs[:, :, 1] = (vecs[:, :, 1] - 0.5) * self.radius
+        vecs[:, :, 2] = (vecs[:, :, 2] - 0.5) * self.height
+
+        # tranform each point based to based on orientation
+        for f in range(vecs.shape[0]):
+            for v in range(vecs.shape[1]):
+                p = vecs[f, v, :]
+                transformed_p = self.applyTransform(p)
+                vecs[f, v, :] = np.hstack(transformed_p)
+
+        # Load the STL files and add the vectors to the plot
+        ax.add_collection3d(mplot3d.art3d.Poly3DCollection(sphere.vectors, edgecolor='k'))
+
+        # scale plot and add labels
+        scale = sphere.points.flatten()
+        ax.auto_scale_xyz(scale, scale, scale)
+        ax.set_xlabel('X (mm)')
+        ax.set_ylabel('Y (mm)')
+        ax.set_zlabel('Z (mm)')
+
+        ax.quiver(0, 0, 0, 1, 1, 1, length=.1)
+
+        return ax

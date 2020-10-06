@@ -6,7 +6,7 @@ from src.Grasp import Grasp
 
 
 class Sphere(Shape):
-    def __init__(self, radius=0, pose=Pose()):
+    def __init__(self, pose=Pose(), radius=0):
         super().__init__(pose)
         self.radius = radius
 
@@ -62,15 +62,13 @@ class Sphere(Shape):
             azimuth += 1
         return totalGrasps
 
-
     def makeMesh(self):
         """
         creates the mesh grid for a box for the 3d plot by:
-         1) creating the object in a 2D plane at the origin
-         2) extruding by the z to get height
-         3) subtract from z the offset for the centroid
-         3) transforming to the object frame
-        :return: coords [np.array] (x, y, z)
+         1) importing unit shape stl
+         2) translating stl to origin and scale by the respective properties
+         3) transform all points by shape pose
+        :return: axes
         """
 
         # display figure and get axes
@@ -78,7 +76,7 @@ class Sphere(Shape):
 
         # Create a new plot
         figure = plt.figure()
-        axes = mplot3d.Axes3D(figure)
+        ax = mplot3d.Axes3D(figure)
 
         # move to origin scale points by dimensions
         vecs = sphere.vectors
@@ -94,11 +92,15 @@ class Sphere(Shape):
                 vecs[f, v, :] = np.hstack(transformed_p)
 
         # Load the STL files and add the vectors to the plot
-        axes.add_collection3d(mplot3d.art3d.Poly3DCollection(sphere.vectors, edgecolor='k'))
+        ax.add_collection3d(mplot3d.art3d.Poly3DCollection(sphere.vectors, edgecolor='w'))
 
         # scale plot and add labels
         scale = sphere.points.flatten()
-        axes.auto_scale_xyz(scale, scale, scale)
-        axes.set_xlabel('X (mm)')
-        axes.set_ylabel('Y (mm)')
-        axes.set_zlabel('Z (mm)')
+        ax.auto_scale_xyz(scale, scale, scale)
+        ax.set_xlabel('X (mm)')
+        ax.set_ylabel('Y (mm)')
+        ax.set_zlabel('Z (mm)')
+
+        ax.quiver(0, 0, 0, 1, 1, 1, length=.1)
+
+        return ax
