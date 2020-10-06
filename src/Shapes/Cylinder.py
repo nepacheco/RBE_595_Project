@@ -20,7 +20,7 @@ class Cylinder(Shape):
     # |
     # |_____X
     # and Y going into the plane
-    def planGrasps(self, graspParams, surfaceOffset = 1):
+    def planGrasps(self, graspParams, surfaceOffset=1):
         """
         Create each grasp assuming the origin of the shape is the global origin, and then multiply the grasp Pose by the
         transformation matrix to put the grasp location in the global frame
@@ -82,14 +82,14 @@ class Cylinder(Shape):
                 # increment grasp rotation and set wrist rotation
                 graspRotation += 2 * np.pi / divisionsOf360
                 wristRotation = 0
-                for k in range(grasp180Rotations):
+                for k in range(2*grasp180Rotations):
                     # These three transformation matrices move the frame of the grasp outside the object.
                     # Additional it guarantees that the z axis of the frame points towards the object (approach vector)
                     # and that the x axis is perpendicular to the central axis and the approach vector to achieve the
                     # thumb vector
                     transXMatrix = Pose.makeTranformfromPose(Pose(self.radius + surfaceOffset, 0, 0, 0, 0, 0))
                     rotYMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, -np.pi / 2, 0))
-                    rotZMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, 0, np.pi / 2))
+                    rotZMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, 0, -np.pi / 2))
 
                     # multiplication of the transformation matrices
                     graspMatrix = np.matmul(divisionsMatrix, transXMatrix)
@@ -99,7 +99,7 @@ class Cylinder(Shape):
                     # Rotate about the approach vector (our z axis) if we need to
                     rotZMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, 0, wristRotation))
                     graspMatrix = np.matmul(graspMatrix, rotZMatrix)
-                    wristRotation += np.pi
+                    wristRotation += np.pi/2
 
                     # Add object to grasp list as a Pose not a matrix
                     graspList.append(Grasp('cylindrical', Pose.makePoseFromTransform(graspMatrix)))
