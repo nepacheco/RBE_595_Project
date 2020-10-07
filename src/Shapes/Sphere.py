@@ -6,7 +6,7 @@ from src.Grasp import Grasp
 
 
 class Sphere(Shape):
-    def __init__(self, pose=Pose(), radius=0):
+    def __init__(self, pose=Pose(), radius=1):
         super().__init__(pose)
         self.radius = radius
 
@@ -15,7 +15,7 @@ class Sphere(Shape):
     # |
     # |_____X
     # and Y going into the plane
-    def planGrasps(self, graspParams, surfaceOffset=100):
+    def planGrasps(self, graspParams, surfaceOffset=1):
         """
          Create each grasp assuming the origin of the shape is the global origin, and then multiply the grasp Pose by
          the transformation matrix to put the grasp location in the global frame
@@ -28,34 +28,31 @@ class Sphere(Shape):
          :return: [array of Grasp Objects] List of grasp objects
          """
         graspList = []
-        divisionsOf360 = graspParams[1]
-        graspRotations = graspParams[2]  # Should not be a multiple of 3
+        divisionsOf360 = graspParams[1]  # Must be at least 1
+        graspRotations = graspParams[2]  # Should not be a multiple of 3 and must at least be 1
 
-        theta = (2 * np.pi) / divisionsOf360
-        phi = (2 * pi) / graspRotations
         outerRadius = self.radius + surfaceOffset
         for i in range(divisionsOf360):
-            azimuthMatrix = Pose.makeTranformfromPose(Pose(outerRadius * cos(i * theta),
-                                                           outerRadius * sin(i * theta), 0,
-                                                           0, 0, i * theta))
-            parallelMatrix = np.matmul(Pose.makeTranformfromPose(self.originPose), azimuthMatrix)
+            # Change to orientation of the origin frame to align with the divisionsOf360
+            rotOriginMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, 0, i*(2 * np.pi)/divisionsOf360))
+            originTransform = np.matmul(rotOriginMatrix, Pose.makeTranformfromPose(self.originPose))
 
             for j in range(divisionsOf360):
-                elevationMatrix = Pose.makeTranformfromPose(Pose(cos(j * theta), 0,
-                                                                 sin(j * theta), 0,
-                                                                 j * theta, 0))
-
-                parallelMatrix = np.matmul(parallelMatrix, elevationMatrix)
+                # Rotate the frame around the y-axis of the origin frame
+                elevationMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, j*(2 * np.pi)/divisionsOf360, 0))
+                parallelMatrix = np.matmul(originTransform, elevationMatrix)
 
                 # Offset by 1 so there is no division by 0
-                for k in range(1, graspRotations + 1):
-                    # The following two transforms align the z axis to the center of the object and rotates the
-                    # x axis around the direction of motion a specified amount of times
+                for k in range(graspRotations):
+                    # The following three transforms move the grasp out of the object, align the z axis to the center
+                    # of the object and rotates the x axis around the direction of motion a specified amount of times
+                    transXMatrix = Pose.makeTranformfromPose(Pose(outerRadius, 0, 0, 0, 0, 0))
                     rotYMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, -np.pi / 2, 0))
-                    rotZMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, 0, (2 * np.pi) / k))
+                    rotZMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, 0, k*(2 * np.pi)/graspRotations))
 
-                    graspMatrix = np.matmul(parallelMatrix, rotYMatrix)
-                    graspMatrix = np.matmul(rotZMatrix, graspMatrix)
+                    graspMatrix = np.matmul(parallelMatrix, transXMatrix)
+                    graspMatrix = np.matmul(graspMatrix, rotYMatrix)
+                    graspMatrix = np.matmul(graspMatrix, rotZMatrix)
                     graspList.append(Grasp('spherical', Pose.makePoseFromTransform(graspMatrix)))
 
         return graspList

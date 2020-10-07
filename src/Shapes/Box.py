@@ -18,7 +18,7 @@ class Box(Shape):
     # |
     # |_____X
     # and Y going into the plane
-    def planGrasps(self, graspParams, surfaceOffset = 100):
+    def planGrasps(self, graspParams, surfaceOffset = 1):
         """
          Create each grasp assuming the origin of the shape is the global origin, and then multiply the grasp Pose by
          the transformation matrix to put the grasp location in the global frame
