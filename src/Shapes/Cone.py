@@ -183,8 +183,8 @@ class Cone(Shape):
             # move surface offset away from object
             transZMatrix = Pose.makeTranformfromPose(Pose(0, 0, -surfaceOffset, 0, 0, 0))
             edgeMatrix = np.matmul(edgeMatrix, transZMatrix)
-
-            rotation += 2 * np.pi / divisionsOf360
+            
+            rotation = rotation + 2 * np.pi / divisionsOf360
             wristRotation = 0
             for j in range(2*grasp180Rotations):
                 # Rotate about the z axis for plan the set of grasps
@@ -192,7 +192,7 @@ class Cone(Shape):
                 graspMatrix = np.matmul(edgeMatrix, rotZMatrix)
 
                 # increment rotation for next loop
-                rotation += np.pi/2
+                wristRotation += np.pi/2
 
                 # Add Grasp to list
                 graspList.append(Grasp('cylindrical', Pose.makePoseFromTransform(graspMatrix)))
