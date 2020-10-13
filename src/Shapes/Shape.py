@@ -1,4 +1,5 @@
 #!/usr/bin/python
+import numpy
 
 from src.Pose import Pose
 import numpy as np
@@ -44,6 +45,34 @@ class Shape:
         :return: mesh [x, y, z]
         """
         return
+
+    def combinePrimatives(self, shapeList):
+        """
+        combines the stl of two primitives
+        :param shapeList: a list of primitives to merge with the first
+        :return: the axes of the new stl
+        """
+        # Create a new plot
+        figure = plt.figure()
+        axes = mplot3d.Axes3D(figure)
+
+        # Combine shape primitives
+        shape1Mesh = self.generateMesh()
+        combined = mesh.Mesh(shape1Mesh.data)
+        for shape in shapeList:
+            shapeMesh = shape.generateMesh()
+            combined = mesh.Mesh(numpy.concatenate([combined.data, shapeMesh.data]))
+
+        # Load the STL files and add the vectors to the plot
+        axes.add_collection3d(mplot3d.art3d.Poly3DCollection(combined.vectors, edgecolor='k'))
+
+        scale = combined.points.flatten()
+        axes.auto_scale_xyz(scale, scale, scale)
+        axes.set_xlabel('X (mm)')
+        axes.set_ylabel('Y (mm)')
+        axes.set_zlabel('Z (mm)')
+
+        return axes
 
     def visualizeGrasps(self, ax, grasps):
         """

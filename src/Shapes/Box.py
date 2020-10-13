@@ -70,7 +70,7 @@ class Box(Shape):
                 yAxisValue = self.height
                 zAxisValue = self.length
 
-            originTransform = np.matmul(rotOriginMatrix, Pose.makeTranformfromPose(self.originPose))
+            originTransform = np.matmul(Pose.makeTranformfromPose(self.originPose), rotOriginMatrix)
 
             # Generate parallel matrix representing the grasper's frame
             translationMatrix = Pose.makeTranformfromPose(Pose(xAxisValue / 2, 0, -zAxisValue / 2, 0, 0, 0))
@@ -107,21 +107,15 @@ class Box(Shape):
 
         return graspList
 
-    def makeMesh(self):
+    def generateMesh(self):
         """
-        creates the mesh grid for a box for the 3d plot by:
+        generates the mesh grid for a box for the 3d plot by:
          1) importing unit shape stl
-         2) translating stl to origin and scale by the respective properties
-         3) transform all points by shape pose
-        :return: axes
+         2) moves the origin of the stl
+        :return: box STL
         """
-
         # display figure and get axes
         box = mesh.Mesh.from_file('STLs/cube.STL')
-
-        # Create a new plot
-        figure = plt.figure()
-        axes = mplot3d.Axes3D(figure)
 
         # move to origin scale points by dimensions
         vecs = box.vectors
@@ -135,6 +129,23 @@ class Box(Shape):
                 p = vecs[f, v, :]
                 transformed_p = self.applyTransform(p)
                 vecs[f, v, :] = np.hstack(transformed_p)
+
+        return box
+
+    def makeMesh(self):
+        """
+        creates the mesh grid for a box for the 3d plot by:
+         1) generating unit shape stl
+         2) translating stl to origin and scale by the respective properties
+         3) transform all points by shape pose
+        :return: axes
+        """
+        # Generate Mesh
+        box = self.generateMesh()
+
+        # Create a new plot
+        figure = plt.figure()
+        axes = mplot3d.Axes3D(figure)
 
         # Load the STL files and add the vectors to the plot
         axes.add_collection3d(mplot3d.art3d.Poly3DCollection(box.vectors, edgecolor='k'))
