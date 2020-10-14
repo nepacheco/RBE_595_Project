@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+    <include file="$(find gazebo_ros)/launch/empty_world.launch" >
+        <arg name="world_name" value="$(find pcl_node)/worlds/camera.world" />
+    </include>
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find pcl_node)/rviz/rviz_config.rviz"/>
+
+    <node name="spawn_box" pkg="gazebo_ros" type="spawn_model" args="-file $(find pcl_node)/urdfs/box.urdf -urdf -z 1 -x 1 -model my_box" />
+
+</launch>
