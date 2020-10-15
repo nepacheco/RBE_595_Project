@@ -10,3 +10,7 @@
 
 
 `pip -m install numpy-stl`
+
+## Add models directory to Gazebo path
+add following line to ~/.bashrc but change it to be relative to your directories
+'export GAZEBO_MODEL_PATH="/home/nicholas/ws_moveit/RBE_595_Project/pcl_node/models/"

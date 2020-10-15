@@ -138,25 +138,18 @@ class Cylinder(Shape):
                 graspList.append(Grasp('spherical', Pose.makePoseFromTransform(graspMatrix)))
         return graspList
 
-
-    def makeMesh(self):
+    def generateMesh(self):
         """
-        creates the mesh grid for a box for the 3d plot by:
+        generates the mesh grid for a cylinder for the 3d plot by:
          1) importing unit shape stl
-         2) translating stl to origin and scale by the respective properties
-         3) transform all points by shape pose
-        :return: axes
+         2) moves the origin of the stl
+        :return: cylinder STL
         """
-
         # display figure and get axes
-        sphere = mesh.Mesh.from_file('STLs/cylinder.STL')
-
-        # Create a new plot
-        figure = plt.figure()
-        ax = mplot3d.Axes3D(figure)
+        cylinder = mesh.Mesh.from_file('STLs/cylinder.STL')
 
         # move to origin scale points by dimensions
-        vecs = sphere.vectors
+        vecs = cylinder.vectors
         vecs[:, :, 0] = (vecs[:, :, 0] - 0.5) * self.radius
         vecs[:, :, 1] = (vecs[:, :, 1] - 0.5) * self.radius
         vecs[:, :, 2] = (vecs[:, :, 2] - 0.5) * self.height
@@ -168,13 +161,31 @@ class Cylinder(Shape):
                 transformed_p = self.applyTransform(p)
                 vecs[f, v, :] = np.hstack(transformed_p)
 
+        return cylinder
+
+
+    def makeMesh(self):
+        """
+        creates the mesh grid for a cylinder for the 3d plot by:
+         1) generating unit shape stl
+         2) translating stl to origin and scale by the respective properties
+         3) transform all points by shape pose
+        :return: axes
+        """
+        # Generate Mesh
+        cylinder = self.generateMesh()
+
+        # Create a new plot
+        figure = plt.figure()
+        ax = mplot3d.Axes3D(figure)
+
         # Load the STL files and add the vectors to the plot
-        ax.add_collection3d(mplot3d.art3d.Poly3DCollection(sphere.vectors, edgecolor='k'))
+        ax.add_collection3d(mplot3d.art3d.Poly3DCollection(cylinder.vectors, edgecolor='k'))
 
         # scale plot and add labels
-        scale = sphere.points.flatten()
+        scale = cylinder.points.flatten()
         # ax.auto_scale_xyz(scale, scale, scale)
-        ax.set_aspect('equal')
+        ax.auto_scale_xyz(scale, scale, scale)
         ax.set_xlabel('X (mm)')
         ax.set_ylabel('Y (mm)')
         ax.set_zlabel('Z (mm)')

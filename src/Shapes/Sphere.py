@@ -35,7 +35,7 @@ class Sphere(Shape):
         for i in range(divisionsOf360):
             # Change to orientation of the origin frame to align with the divisionsOf360
             rotOriginMatrix = Pose.makeTranformfromPose(Pose(0, 0, 0, 0, 0, i*(2 * np.pi)/divisionsOf360))
-            originTransform = np.matmul(rotOriginMatrix, Pose.makeTranformfromPose(self.originPose))
+            originTransform = np.matmul(Pose.makeTranformfromPose(self.originPose), rotOriginMatrix)
 
             for j in range(divisionsOf360):
                 # Rotate the frame around the y-axis of the origin frame
@@ -57,21 +57,15 @@ class Sphere(Shape):
 
         return graspList
 
-    def makeMesh(self):
+    def generateMesh(self):
         """
-        creates the mesh grid for a box for the 3d plot by:
+        generates the mesh grid for a sphere for the 3d plot by:
          1) importing unit shape stl
-         2) translating stl to origin and scale by the respective properties
-         3) transform all points by shape pose
-        :return: axes
+         2) moves the origin of the stl
+        :return: sphere STL
         """
-
         # display figure and get axes
         sphere = mesh.Mesh.from_file('STLs/sphere.STL')
-
-        # Create a new plot
-        figure = plt.figure()
-        ax = mplot3d.Axes3D(figure)
 
         # move to origin scale points by dimensions
         vecs = sphere.vectors
@@ -85,6 +79,23 @@ class Sphere(Shape):
                 p = vecs[f, v, :]
                 transformed_p = self.applyTransform(p)
                 vecs[f, v, :] = np.hstack(transformed_p)
+
+        return sphere
+
+    def makeMesh(self):
+        """
+        creates the mesh grid for a sphere for the 3d plot by:
+         1) generating unit shape stl
+         2) translating stl to origin and scale by the respective properties
+         3) transform all points by shape pose
+        :return: axes
+        """
+        # Generate Mesh
+        sphere = self.generateMesh()
+
+        # Create a new plot
+        figure = plt.figure()
+        ax = mplot3d.Axes3D(figure)
 
         # Load the STL files and add the vectors to the plot
         ax.add_collection3d(mplot3d.art3d.Poly3DCollection(sphere.vectors, edgecolor='w'))

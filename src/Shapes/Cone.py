@@ -198,26 +198,18 @@ class Cone(Shape):
                 graspList.append(Grasp('cylindrical', Pose.makePoseFromTransform(graspMatrix)))
         return graspList
 
-
-
-    def makeMesh(self):
+    def generateMesh(self):
         """
-        creates the mesh grid for a box for the 3d plot by:
-         1) importing unit shape stl
-         2) translating stl to origin and scale by the respective properties
-         3) transform all points by shape pose
-        :return: axes
+        generates the mesh grid for a cone for the 3d plot by:
+        1) importing unit shape stl
+        2) moves the origin of the stl
+        :return: cone STL
         """
-
         # display figure and get axes
-        sphere = mesh.Mesh.from_file('STLs/cone.STL')
-
-        # Create a new plot
-        figure = plt.figure()
-        ax = mplot3d.Axes3D(figure)
+        cone = mesh.Mesh.from_file('STLs/cone.STL')
 
         # move to origin scale points by dimensions
-        vecs = sphere.vectors
+        vecs = cone.vectors
         vecs[:, :, 0] = (vecs[:, :, 0] - 1) * self.radius
         vecs[:, :, 1] = (vecs[:, :, 1] - 1) * self.radius
         vecs[:, :, 2] = (vecs[:, :, 2] - 0.25) * self.height
@@ -229,11 +221,30 @@ class Cone(Shape):
                 transformed_p = self.applyTransform(p)
                 vecs[f, v, :] = np.hstack(transformed_p)
 
+        return cone
+
+
+    def makeMesh(self):
+        """
+        creates the mesh grid for a cone for the 3d plot by:
+         1) generating unit shape stl
+         2) translating stl to origin and scale by the respective properties
+         3) transform all points by shape pose
+        :return: axes
+        """
+        # Generate Mesh
+        cone = self.generateMesh()
+
+        # Create a new plot
+        figure = plt.figure()
+        ax = mplot3d.Axes3D(figure)
+
+
         # Load the STL files and add the vectors to the plot
-        ax.add_collection3d(mplot3d.art3d.Poly3DCollection(sphere.vectors, edgecolor='k'))
+        ax.add_collection3d(mplot3d.art3d.Poly3DCollection(cone.vectors, edgecolor='k'))
 
         # scale plot and add labels
-        scale = sphere.points.flatten()
+        scale = cone.points.flatten()
         ax.auto_scale_xyz(scale, scale, scale)
         ax.set_xlabel('X (mm)')
         ax.set_ylabel('Y (mm)')
