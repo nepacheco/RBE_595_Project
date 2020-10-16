@@ -2,14 +2,14 @@
 # !/usr/bin/env python
 
 import rospy
-from std_msgs.msg import String
+from shape_node.msg import shapeArray
 import numpy as np
 import math
 import matplotlib.pyplot as plt
 from stl import mesh
 from mpl_toolkits import mplot3d
 
-from math import pi
+from math import atan2, asin
 from src.Pose import Pose
 from src.Grasp import Grasp
 from src.Shapes.Cylinder import Cylinder
@@ -18,32 +18,17 @@ from src.Shapes.Box import Box
 from src.Shapes.Sphere import Sphere
 
 
-def callback(data):
-    rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.data)
-
-
-def listener():
-    # In ROS, nodes are uniquely named. If two nodes with the same
-    # name are launched, the previous one is kicked off. The
-    # anonymous=True flag means that rospy will choose a unique
-    # name for our 'listener' node so that multiple listeners can
-    # run simultaneously.
-    rospy.init_node('listener', anonymous=True)
-
-    rospy.Subscriber("ShapeArray", shapeArray, callback)
-
-    # spin() simply keeps python from exiting until this node is stopped
-    rospy.spin()
-
 def testCylinderGraspLocations():
     cylinder = Cylinder(Pose(0,0,5,0,0,0),10,1)
     grasps = cylinder.planGrasps([1,2,1,1])
     print(grasps)
 
+
 def testConeGraspLocations():
     cone = Cone(Pose(0,0,5,0,0,0),10,5)
     grasps = cone.planGrasps([1,1,1,1])
     print(grasps)
+
 
 def makeCoffeeMug():
     pc = Pose(0, 0, 0, 0, 0, 0)
@@ -107,6 +92,80 @@ def makePhone():
     box2.visualizeGrasps(axes, graspBox2)
     box3.visualizeGrasps(axes, graspBox3)
     plt.show()
+
+
+def makeBox(p0, parameters):
+    m = Box(p0, parameters(4), parameters(5), parameters(6))
+    ax = m.makeMesh()
+    grasps = m.planGrasps([parameters(0), parameters(1), parameters(2), parameters(3)])
+    m.visualizeGrasps(ax, grasps)
+    plt.show()
+
+
+def makeCylinder(p0, parameters):
+    m = Cylinder(p0, parameters(4), parameters(7))
+    ax = m.makeMesh()
+    grasps = m.planGrasps([parameters(0), parameters(1), parameters(2), parameters(3)])
+    m.visualizeGrasps(ax, grasps)
+    plt.show()
+
+
+def makeSphere(p0, parameters):
+    m = Sphere(p0, parameters(7))
+    ax = m.makeMesh()
+    grasps = m.planGrasps([parameters(0), parameters(1), parameters(2), parameters(3)])
+    m.visualizeGrasps(ax, grasps)
+    plt.show()
+
+
+def makeCone(p0, parameters):
+    m = Cone(p0, parameters(4), parameters(7))
+    ax = m.makeMesh()
+    grasps = m.planGrasps([parameters(0), parameters(1), parameters(2), parameters(3)])
+    m.visualizeGrasps(ax, grasps)
+    plt.show()
+
+
+switch = {
+            "Box":      makeBox,
+            "Cylinder": makeCylinder,
+            "Sphere":   makeSphere,
+            "Cone":     makeCone
+         }
+
+
+# Parameters has 8 values [[4 build parameters], h, w, l, r]
+def callback(data):
+    Euler = quatToEuler(data.pose.orientation)
+    p0 = Pose(data.pose.position.x, data.pose.position.y, data.pose.position.z, Euler(0), Euler(1), Euler(2))
+    param = data.parameters
+    switch[data.shapetype](p0,param)
+
+
+def quatToEuler(quaternion):
+    q0 = quaternion.x
+    q1 = quaternion.y
+    q2 = quaternion.z
+    q3 = quaternion.w
+
+    wx = atan2(2*((q0*q1)+(q2*q3)), 1-(2*(q1^2+q2^2)))
+    wy = asin(2*(q0*q2-q3*q1))
+    wz = atan2(2*((q0*q3)+(q1*q2)), 1-(2*(q2^2+q3^2)))
+    return [wx, wy, wz]
+
+
+def listener():
+    # In ROS, nodes are uniquely named. If two nodes with the same
+    # name are launched, the previous one is kicked off. The
+    # anonymous=True flag means that rospy will choose a unique
+    # name for our 'listener' node so that multiple listeners can
+    # run simultaneously.
+    rospy.init_node('listener', anonymous=True)
+
+    rospy.Subscriber("/ShapeArray", shapeArray, callback)
+
+    # spin() simply keeps python from exiting until this node is stopped
+    rospy.spin()
 
 
 if __name__ == '__main__':
