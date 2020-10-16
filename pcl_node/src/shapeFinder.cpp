@@ -2,10 +2,10 @@
 // PCL specific includes
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
+#include <pcl/conversions.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/visualization/cloud_viewer.h>
-
 #include <pcl/filters/voxel_grid.h>
 
 ros::Publisher pub;
@@ -18,8 +18,15 @@ cloud_cb (const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
   pcl::PCLPointCloud2ConstPtr cloudPtr(cloud);
   pcl::PCLPointCloud2 cloud_filtered;
 
+  
+
   // Convert to PCL data type
   pcl_conversions::toPCL(*cloud_msg, *cloud);
+
+  // Convert from PointCloud2 to PointCloud<pcl::PointXYZ>
+  pcl::PointCloud<pcl::PointXYZ> point_cloud;
+  pcl::fromPCLPointCloud2(*cloud, point_cloud);
+
 
   // Perform the actual filtering
   // TODO: MAKE PLANAR FILTERING
