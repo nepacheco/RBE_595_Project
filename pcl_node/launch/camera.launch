@@ -5,7 +5,7 @@
     </include>
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find pcl_node)/rviz/rviz_config.rviz"/>
 
-    <node name="spawn_box" pkg="gazebo_ros" type="spawn_model" args="-file $(find pcl_node)/urdfs/box.urdf -urdf -z 1 -x 1 -model my_box" />
+    <node name="spawn_box" pkg="gazebo_ros" type="spawn_model" args="-file $(find pcl_node)/urdfs/box.urdf -urdf -z 1 -x 0.5 -model my_box" />
     <node name="spawn_cylinder" pkg="gazebo_ros" type="spawn_model" args="-file $(find pcl_node)/urdfs/cylinder.urdf -urdf -z 0.5 -x 1.2 -model my_cylinder" />
 
 </launch>
