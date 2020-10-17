@@ -1,4 +1,5 @@
 #include <ros/ros.h>
+#include <iostream>
 // PCL specific includes
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
@@ -6,6 +7,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/visualization/cloud_viewer.h>
+#include <pcl-1.8/pcl/visualization/cloud_viewer.h>
 #include <pcl/filters/voxel_grid.h>
 
 ros::Publisher pub;
@@ -24,8 +26,9 @@ cloud_cb (const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
   pcl_conversions::toPCL(*cloud_msg, *cloud);
 
   // Convert from PointCloud2 to PointCloud<pcl::PointXYZ>
-  pcl::PointCloud<pcl::PointXYZ> point_cloud;
-  pcl::fromPCLPointCloud2(*cloud, point_cloud);
+  // pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud;
+  // pcl::fromPCLPointCloud2(*cloud, *point_cloud);
+
 
 
   // Perform the actual filtering

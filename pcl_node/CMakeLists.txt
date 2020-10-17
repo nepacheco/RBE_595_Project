@@ -206,9 +206,9 @@ include_directories(
 # catkin_add_nosetests(test)
 
 
-
 add_executable(shapeFinder src/shapeFinder.cpp)
 
 target_link_libraries(shapeFinder
   ${catkin_LIBRARIES}
+  ${PCL_LIBRARIES} 
 )
