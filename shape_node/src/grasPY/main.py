@@ -1,21 +1,22 @@
-# Script for testing
-# !/usr/bin/env python
+#! /usr/bin/env python
 
 import rospy
 from shape_node.msg import shapeArray
 import numpy as np
 import math
 import matplotlib.pyplot as plt
-from stl import mesh
 from mpl_toolkits import mplot3d
 
 from math import atan2, asin
-from src.Pose import Pose
-from src.Grasp import Grasp
-from src.Shapes.Cylinder import Cylinder
-from src.Shapes.Cone import Cone
-from src.Shapes.Box import Box
-from src.Shapes.Sphere import Sphere
+from Pose import Pose
+from Grasp import Grasp
+from Shapes.Cylinder import Cylinder
+from Shapes.Cone import Cone
+from Shapes.Box import Box
+from Shapes.Sphere import Sphere
+from stl import mesh
+
+
 
 
 def testCylinderGraspLocations():

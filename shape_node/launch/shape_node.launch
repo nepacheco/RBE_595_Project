@@ -1,0 +1,4 @@
+<launch>
+	<node pkg = "shape_node" type="main.py" name="shape_subscriber" output="screen"> </node>
+</launch>
+
