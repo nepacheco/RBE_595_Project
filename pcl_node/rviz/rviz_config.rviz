@@ -95,11 +95,18 @@ Visualization Manager:
       Transport Hint: raw
       Unreliable: false
       Value: true
+    - Class: rviz/Axes
+      Enabled: true
+      Length: 1
+      Name: Axes
+      Radius: 0.10000000149011612
+      Reference Frame: <Fixed Frame>
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
     Default Light: true
-    Fixed Frame: camera_link
+    Fixed Frame: map
     Frame Rate: 30
   Name: root
   Tools:
@@ -123,25 +130,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 15.735193252563477
+      Distance: 6.068112850189209
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -1.3714004755020142
-        Y: -0.9969605803489685
-        Z: 1.6746846437454224
+        X: 0.6664965152740479
+        Y: -1.2666081190109253
+        Z: 1.7299492359161377
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.4303981363773346
+      Pitch: 0.36520349979400635
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.54357385635376
+      Yaw: 4.438573837280273
     Saved: ~
 Window Geometry:
   Displays:
