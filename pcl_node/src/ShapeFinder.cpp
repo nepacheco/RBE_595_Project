@@ -8,6 +8,7 @@
 #include <pcl/point_types.h>
 #include <pcl/visualization/cloud_viewer.h>
 #include <pcl-1.8/pcl/visualization/cloud_viewer.h>
+#include <pcl/features/normal_3d.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/sample_consensus/model_types.h>
@@ -18,7 +19,7 @@ ros::Publisher pubCoeffs;
 ros::Publisher pub_ext_objs;
 
 void extractObjects(pcl::PointCloud<pcl::PointXYZ>::Ptr original_cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud);
-
+bool segmentCylinder(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud);
 
 
 void cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input)
@@ -29,13 +30,15 @@ void cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input)
 
   // Cloud of just the objects (no floor plane)
   pcl::PointCloud<pcl::PointXYZ>::Ptr obj_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cylinder_cloud (new pcl::PointCloud<pcl::PointXYZ>);
 
   // Remove floor plane from cloud
   extractObjects(cloud, obj_cloud);
+  segmentCylinder(obj_cloud, cylinder_cloud);
 
   // convert clouds to ros msgs for outputting
   sensor_msgs::PointCloud2 outputCloud;
-  pcl::toROSMsg(*obj_cloud, outputCloud);
+  pcl::toROSMsg(*cylinder_cloud, outputCloud);
   pub_ext_objs.publish (outputCloud);
 
   // Publish the model coefficients
@@ -45,6 +48,54 @@ void cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input)
   // pubCoeffs.publish (ros_coefficients);
 }
 
+bool segmentCylinder(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud){
+  
+  // Objects needed
+  pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> ne;
+  pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ> ());
+  pcl::SACSegmentationFromNormals<pcl::PointXYZ, pcl::Normal> seg; 
+  pcl::ExtractIndices<pcl::PointXYZ> extract;
+
+  // Dataset objects
+  pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
+  pcl::ModelCoefficients::Ptr coefficients_cylinder (new pcl::ModelCoefficients);
+  pcl::PointIndices::Ptr inliers_cylinder (new pcl::PointIndices);
+
+  // Estimate point normals
+  ne.setSearchMethod (tree);
+  ne.setInputCloud (cloud);
+  ne.setKSearch (50);
+  ne.compute (*cloud_normals);
+
+  // Create the segmentation object for cylinder segmentation and set all the parameters
+  seg.setOptimizeCoefficients (true);
+  seg.setModelType (pcl::SACMODEL_CYLINDER);
+  seg.setMethodType (pcl::SAC_RANSAC);
+  seg.setNormalDistanceWeight (0.1);
+  seg.setMaxIterations (10000);
+  seg.setDistanceThreshold (0.05);
+  seg.setRadiusLimits (0, 0.2);
+  seg.setInputCloud (cloud);
+  seg.setInputNormals (cloud_normals);
+
+  // Obtain the cylinder inliers and coefficients
+  seg.segment (*inliers_cylinder, *coefficients_cylinder);
+
+  // Extract Cylinder 
+  extract.setInputCloud (cloud);
+  extract.setIndices (inliers_cylinder);
+  extract.setNegative (false);
+  extract.filter (*filtered_cloud);
+
+  // std::cout << *coefficients_cylinder << std::endl;
+
+  return true;
+}
+
+/**
+ * extracts largest plane from cloud 
+ * 
+ **/
 void extractObjects(pcl::PointCloud<pcl::PointXYZ>::Ptr original_cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud)
 {
   // outputs objects of segmentaion
