@@ -1,7 +1,11 @@
 #include <ros/ros.h>
 #include <iostream>
+#include <math.h>  
+
 // PCL specific includes
+#include <pcl_ros/transforms.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <tf/transform_listener.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/conversions.h>
 #include <pcl/point_cloud.h>
@@ -15,11 +19,14 @@
 #include <pcl/sample_consensus/method_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
 
+#define PI 3.14159265
+
 ros::Publisher pubCoeffs;
 ros::Publisher pub_ext_objs;
 
 void extractObjects(pcl::PointCloud<pcl::PointXYZ>::Ptr original_cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud);
 bool segmentCylinder(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud);
+void coordsFromCam(float *points, float *coords);
 
 
 void cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input)
@@ -87,9 +94,58 @@ bool segmentCylinder(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointCloud<
   extract.setNegative (false);
   extract.filter (*filtered_cloud);
 
-  // std::cout << *coefficients_cylinder << std::endl;
+  // Get parameters of cylinder
+  float radius = coefficients_cylinder->values[6];  
+  float maxH = 0;
+  float axis[3] = {coefficients_cylinder->values[0], coefficients_cylinder->values[1], coefficients_cylinder->values[2]};
+  float centroid[3] = {0, 0, 0};
+
+  float sumX = 0, sumY = 0, avgX = 0, avgY = 0;
+  int num_points = filtered_cloud->points.size();
+
+  for (int i = 0; i < num_points; i++) {
+    float points[3] = {filtered_cloud->points[i].x, filtered_cloud->points[i].y, filtered_cloud->points[i].z};
+    float coords[3];
+
+    coordsFromCam(points, coords);
+    if (coords[2] > maxH) maxH = coords[2];
+
+    sumX += coords[0];
+    sumY += coords[1];
+  }
+
+  avgX = sumX / num_points;
+  avgY = sumY / num_points;
+
+  float gamma = atan2(avgY, avgX);
+  // float centroid[3] = {(avgX + cos(gamma) * radius), (avgY + sin(gamma) * radius), maxH/2};
+  coordsFromCam(axis, centroid);
+
+  std::cout << "Radius " << radius
+            << " Height " << maxH
+            << " Centroid " << centroid[0]
+            << "  " << centroid[1]
+            << "  " << centroid[2] <<
+  std::endl;
 
   return true;
+}
+
+void coordsFromCam(float *points, float *coords){
+  float x = points[0];
+  float y = points[1];
+  float z = points[2];
+
+  float d = sqrt(pow(z,2) + pow(y,2));
+  float alpha = atan2(z,y);
+  float beta = alpha - PI / 4;
+  float a = cos(beta) * d;
+
+  float b = sin(beta) * d;
+
+  coords[0] = b;
+  coords[1] = -x;
+  coords[2] = 1 - a;
 }
 
 /**
