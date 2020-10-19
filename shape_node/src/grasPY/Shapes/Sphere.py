@@ -1,8 +1,8 @@
-from .Shape import Shape
+from Shape import Shape
 from copy import deepcopy
-from src.Shapes.Shape import *
+from Shapes.Shape import *
 from math import *
-from src.Grasp import Grasp
+from Grasp import Grasp
 
 
 class Sphere(Shape):

@@ -1,4 +1,4 @@
-from .Pose import Pose
+from Pose import Pose
 
 class Grasp:
 
