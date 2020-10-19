@@ -1,11 +1,11 @@
 import copy
-from src.Shapes.Shape import Shape
-from ..Pose import Pose
-from src.Grasp import Grasp
+from Shapes.Shape import Shape
+from Pose import Pose
+from Grasp import Grasp
 from scipy.spatial.transform import Rotation as R
 import numpy as np
 import math
-from src.Shapes.Shape import *
+from Shapes.Shape import *
 
 class Cone(Shape):
 

@@ -1,8 +1,8 @@
 import copy
 import numpy as np
-from src.Shapes.Shape import *
-from src.Grasp import Grasp
-from src.Pose import Pose
+from Shapes.Shape import *
+from Grasp import Grasp
+from Pose import Pose
 
 
 class Box(Shape):

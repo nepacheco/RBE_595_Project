@@ -1,8 +1,8 @@
 import copy
-from src.Shapes.Shape import Shape
-from ..Pose import Pose
-from src.Grasp import Grasp
-from src.Shapes.Shape import *
+from Shape import Shape
+from Pose import Pose
+from Grasp import Grasp
+from Shapes.Shape import *
 from math import *
 from scipy.spatial.transform import Rotation as R
 import numpy as np
