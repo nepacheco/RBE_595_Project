@@ -19,10 +19,12 @@
 #include <pcl/sample_consensus/method_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
 
+#include <shape_node/shapeArray.h>
 #define PI 3.14159265
 
 ros::Publisher pubCoeffs;
 ros::Publisher pub_ext_objs;
+ros::Publisher pub_shape;
 
 void extractObjects(pcl::PointCloud<pcl::PointXYZ>::Ptr original_cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud);
 bool segmentCylinder(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud);
@@ -193,6 +195,7 @@ int main (int argc, char** argv)
   // pub = nh.advertise<sensor_msgs::PointCloud2> ("output", 1);
   pub_ext_objs = nh.advertise<sensor_msgs::PointCloud2> ("extracted_objects", 1);
   pubCoeffs = nh.advertise<pcl_msgs::ModelCoefficients> ("output", 1);
+  pub_shape = nh.advertise<shape_node::shapeArray> ("ShapeArray", 1);
 
   // Spin
   ros::spin ();
