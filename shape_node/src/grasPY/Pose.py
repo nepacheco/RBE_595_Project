@@ -29,7 +29,7 @@ class Pose:
         eulers = np.array([p.roll, p.pitch, p.yaw])     # euler array
 
         rot = R.from_euler('xyz', eulers)       # create rotation matrix from euler angles
-
+    
         # assemble transformation matrix
         T[0:3, 0:3] = rot.as_matrix()
         T[0, 3] = p.x

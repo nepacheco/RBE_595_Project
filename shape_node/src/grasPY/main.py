@@ -104,9 +104,11 @@ def makeBox(p0, parameters):
 
 
 def makeCylinder(p0, parameters):
-    m = Cylinder(p0, parameters(4), parameters(7))
+    print(p0)
+    print(parameters)
+    m = Cylinder(p0, parameters[4], parameters[7])
     ax = m.makeMesh()
-    grasps = m.planGrasps([parameters(0), parameters(1), parameters(2), parameters(3)])
+    grasps = m.planGrasps([parameters[0], parameters[1], parameters[2], parameters[3]])
     m.visualizeGrasps(ax, grasps)
     plt.show()
 
@@ -137,21 +139,22 @@ switch = {
 
 # Parameters has 8 values [[4 build parameters], h, w, l, r]
 def callback(data):
-    Euler = quatToEuler(data.pose.orientation)
-    p0 = Pose(data.pose.position.x, data.pose.position.y, data.pose.position.z, Euler(0), Euler(1), Euler(2))
+    ori = data.pose.orientation
+    Euler = quatToEuler([ori.x, ori.y, ori.z, ori.w])
+    p0 = Pose(data.pose.position.x, data.pose.position.y, data.pose.position.z, Euler[0], Euler[1], Euler[2])
     param = data.parameters
-    switch[data.shapetype](p0,param)
+    switch[data.shapetype.data](p0,param)
 
 
 def quatToEuler(quaternion):
-    q0 = quaternion.x
-    q1 = quaternion.y
-    q2 = quaternion.z
-    q3 = quaternion.w
+    q0 = quaternion[0]
+    q1 = quaternion[1]
+    q2 = quaternion[2]
+    q3 = quaternion[3]
 
-    wx = atan2(2*((q0*q1)+(q2*q3)), 1-(2*(q1^2+q2^2)))
+    wx = atan2(2*((q0*q1)+(q2*q3)), 1-(2*(q1**2+q2**2)))
     wy = asin(2*(q0*q2-q3*q1))
-    wz = atan2(2*((q0*q3)+(q1*q2)), 1-(2*(q2^2+q3^2)))
+    wz = atan2(2*((q0*q3)+(q1*q2)), 1-(2*(q2**2+q3**2)))
     return [wx, wy, wz]
 
 

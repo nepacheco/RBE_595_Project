@@ -18,6 +18,7 @@
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/sample_consensus/method_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
+#include <std_msgs/String.h>
 
 #include <shape_node/shapeArray.h>
 #define PI 3.14159265
@@ -129,6 +130,16 @@ bool segmentCylinder(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointCloud<
             << "  " << centroid[1]
             << "  " << centroid[2] <<
   std::endl;
+
+  // Publish the shape message
+  shape_node::shapeArray msg;
+
+  msg.shapetype.data = "Cylinder";
+  msg.pose.position.x = centroid[0];
+  msg.pose.position.y = centroid[1];
+  msg.pose.position.z = centroid[2];
+  msg.parameters = {1, 1, 1, 1, maxH, 0, 0, radius};
+  pub_shape.publish(msg);
 
   return true;
 }
