@@ -8,13 +8,13 @@
     <visual>
        <origin xyz="0 0 0" />
       <geometry>
-        <mesh filename="package://pcl_node/urdfs/cone.STL" scale="0.2 0.2 0.2"/>
+        <mesh filename="package://pcl_node/urdfs/cone.STL" scale="0.15 0.15 0.3"/>
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" />
       <geometry>
-        <mesh filename="package://pcl_node/urdfs/cone.STL" scale="0.2 0.2 0.2"/>
+        <mesh filename="package://pcl_node/urdfs/cone.STL" scale="0.15 0.15 0.3"/>
       </geometry>
     </collision>
   </link>

@@ -10,7 +10,7 @@
 
     <!-- <node name="spawn_box" pkg="gazebo_ros" type="spawn_model" args="-file $(find pcl_node)/urdfs/box.urdf -urdf -z 1 -x 0.75 -model my_box" /> -->
     <!-- <node name="spawn_cylinder" pkg="gazebo_ros" type="spawn_model" args="-file $(find pcl_node)/urdfs/cylinder.urdf -urdf -z 0.5 -x 1.2 -model my_cylinder" /> -->
-    <node name="spawn_sphere" pkg="gazebo_ros" type="spawn_model" args="-file $(find pcl_node)/urdfs/sphere.urdf -urdf -y 0.3 -x 0.75 -model my_sphere" />
-    <!-- <node name="spawn_cone" pkg="gazebo_ros" type="spawn_model" args="-file $(find pcl_node)/urdfs/cone.urdf -urdf -y 0.5 -x 1.2 -z 0.1 -model my_cone" /> -->
+    <!-- <node name="spawn_sphere" pkg="gazebo_ros" type="spawn_model" args="-file $(find pcl_node)/urdfs/sphere.urdf -urdf -y 0.3 -x 0.75 -model my_sphere" /> -->
+    <node name="spawn_cone" pkg="gazebo_ros" type="spawn_model" args="-file $(find pcl_node)/urdfs/cone.urdf -urdf -y 0 -x 0.8 -z 0.1 -model my_cone" />
 
 </launch>
