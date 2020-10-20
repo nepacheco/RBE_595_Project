@@ -6,6 +6,7 @@ from Shapes.Shape import *
 from math import *
 from scipy.spatial.transform import Rotation as R
 import numpy as np
+import os
 
 
 class Cylinder(Shape):
@@ -54,9 +55,9 @@ class Cylinder(Shape):
         :param graspParams: [array 1x4] Grasp parameters associated with creating grasps
         :return: [list<Grasp>] A list of grasps
         """
-        parallelPlanes = graspParams[0]  # this number should be odd
-        divisionsOf360 = graspParams[1]
-        grasp180Rotations = graspParams[3]
+        parallelPlanes = int(graspParams[0])  # this number should be odd
+        divisionsOf360 = int(graspParams[1])
+        grasp180Rotations = int(graspParams[3])
 
         graspList = []
         # Side Grasps
@@ -115,7 +116,7 @@ class Cylinder(Shape):
         :return: [list<Grasp>] A list of grasps
         """
         graspList = []
-        graspRotations = graspParams[2]
+        graspRotations = int(graspParams[2])
         # There are two ends and we just need to invert the z axis for one of them
         for i in range(2):
             # rotation about the y axis only if i == 1
@@ -146,7 +147,9 @@ class Cylinder(Shape):
         :return: cylinder STL
         """
         # display figure and get axes
-        cylinder = mesh.Mesh.from_file('STLs/cylinder.STL')
+        cur_path = os.path.dirname(os.path.abspath(__file__))
+        new_path = os.path.join(cur_path, '../STLs/cylinder.STL')
+        cylinder = mesh.Mesh.from_file(new_path)
 
         # move to origin scale points by dimensions
         vecs = cylinder.vectors

@@ -104,8 +104,6 @@ def makeBox(p0, parameters):
 
 
 def makeCylinder(p0, parameters):
-    print(p0)
-    print(parameters)
     m = Cylinder(p0, parameters[4], parameters[7])
     ax = m.makeMesh()
     grasps = m.planGrasps([parameters[0], parameters[1], parameters[2], parameters[3]])
