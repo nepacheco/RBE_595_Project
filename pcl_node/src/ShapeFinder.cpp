@@ -34,6 +34,7 @@ void extractObjects(pcl::PointCloud<pcl::PointXYZ>::Ptr original_cloud, pcl::Poi
 bool segmentCylinder(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud);
 bool segmentSphere(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud);
 bool segmentCone(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud);
+bool segmentBox(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud);
 void coordsFromCam(float *points, float *coords);
 
 
@@ -46,9 +47,7 @@ void cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input)
   // Cloud of just the objects (no floor plane)
   pcl::PointCloud<pcl::PointXYZ>::Ptr obj_cloud (new pcl::PointCloud<pcl::PointXYZ>);
   pcl::PointCloud<pcl::PointXYZ>::Ptr cylinder_cloud (new pcl::PointCloud<pcl::PointXYZ>);
-
-  
-      sensor_msgs::PointCloud2 outputCloud;
+  sensor_msgs::PointCloud2 outputCloud;
 
   // Remove floor plane from cloud
   extractObjects(cloud, obj_cloud);
@@ -56,30 +55,26 @@ void cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input)
   switch(shape_param){
     case 1: 
       segmentCylinder(obj_cloud, cylinder_cloud);
-      // convert clouds to ros msgs for outputting
-      pcl::toROSMsg(*cylinder_cloud, outputCloud);
-      pub_ext_objs.publish (outputCloud);
       break;
     case 2:
       segmentSphere(obj_cloud, cylinder_cloud);
-      // convert clouds to ros msgs for outputting
-      pcl::toROSMsg(*cylinder_cloud, outputCloud);
-      pub_ext_objs.publish (outputCloud);
       break;
     case 3:
       segmentCone(obj_cloud, cylinder_cloud);
-      // convert clouds to ros msgs for outputting
-      pcl::toROSMsg(*cylinder_cloud, outputCloud);
-      pub_ext_objs.publish (outputCloud);
       break;
     case 4:
+      segmentBox(obj_cloud, cylinder_cloud);
       break;
     default:
       break;
   }
 
-}
 
+  // convert clouds to ros msgs for outputting
+  pcl::toROSMsg(*cylinder_cloud, outputCloud);
+  pub_ext_objs.publish (outputCloud);
+
+}
 
 bool segmentCylinder(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud){
   
@@ -344,6 +339,97 @@ bool segmentCone(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointCloud<pcl:
   return true;
 }
 
+bool segmentBox(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud){
+  
+  // Objects needed
+  pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> ne;
+  pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ> ());
+  pcl::SACSegmentationFromNormals<pcl::PointXYZ, pcl::Normal> seg; 
+  pcl::ExtractIndices<pcl::PointXYZ> extract;
+
+  // Dataset objects
+  pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
+  pcl::ModelCoefficients::Ptr coefficients_cylinder (new pcl::ModelCoefficients);
+  pcl::PointIndices::Ptr inliers_cylinder (new pcl::PointIndices);
+
+  // Estimate point normals
+  ne.setSearchMethod (tree);
+  ne.setInputCloud (cloud);
+  ne.setKSearch (50);
+  ne.compute (*cloud_normals);
+
+  // Create the segmentation object for cylinder segmentation and set all the parameters
+  seg.setOptimizeCoefficients (true);
+  seg.setModelType (pcl::SACMODEL_PLANE);
+  seg.setMethodType (pcl::SAC_RANSAC);
+  seg.setDistanceThreshold (0.01);
+  seg.setInputCloud (cloud);
+  seg.setInputNormals (cloud_normals);
+
+  // Obtain the cylinder inliers and coefficients
+  seg.segment (*inliers_cylinder, *coefficients_cylinder);
+
+  // Extract Cylinder 
+  extract.setInputCloud (cloud);
+  extract.setIndices (inliers_cylinder);
+  extract.setNegative (false);
+  extract.filter (*filtered_cloud);
+
+  // Get parameters of cylinder
+  float radius = coefficients_cylinder->values[6];
+  float axis[3] = {coefficients_cylinder->values[0], coefficients_cylinder->values[1], coefficients_cylinder->values[2]};
+  float centroid[3] = {0, 0, 0};
+
+  float sumX = 0, sumY = 0, sumZ = 0, avgX = 0, avgY = 0, avgZ = 0;
+  float minX = 100, minY = 100, maxX = 0, maxY = 0;
+  int num_points = filtered_cloud->points.size();
+
+  for (int i = 0; i < num_points; i++) {
+    float points[3] = {filtered_cloud->points[i].x, filtered_cloud->points[i].y, filtered_cloud->points[i].z};
+    float coords[3];
+
+    coordsFromCam(points, coords);
+    float x = coords[0];
+    float y = coords[1];
+
+    if (x < minX) minX = x;
+    if (x > maxX) maxX = x;
+    if (y < minY) minY = y;
+    if (y > maxY) maxY = y;
+
+    sumX += x;
+    sumY += y;
+    sumZ += coords[2];
+  }
+
+  avgX = sumX / num_points;
+  avgY = sumY / num_points;
+  avgZ = sumZ / num_points;
+  float avg[3] = {avgX, avgY, avgZ};
+
+  std::cout << "AvgX " << avg[0]
+            << " AvgY " << avg[1]
+            << " AvgZ " << avg[2] <<
+  std::endl;
+
+  // Publish the shape message
+  shape_node::shapeArray msg;
+
+  msg.shapetype.data = "Box";
+  msg.pose.position.x = avg[0];
+  msg.pose.position.y = avg[1];
+  msg.pose.position.z = avg[2]/2;
+  msg.parameters = {1, 1, 1, 1, avg[2], fabs(minY - maxY), fabs(minX - maxX), 0};
+  pub_shape.publish(msg);
+
+  // Publish pose message for centroid
+  geometry_msgs::PoseStamped pose_msg;
+  pose_msg.pose = msg.pose;
+  pose_msg.header.frame_id = "/map";
+  pub_pose.publish(pose_msg);
+
+  return true;
+}
 
 void coordsFromCam(float *points, float *coords){
   float x = points[0];
@@ -362,10 +448,6 @@ void coordsFromCam(float *points, float *coords){
   coords[2] = 1 - a;
 }
 
-/**
- * extracts largest plane from cloud 
- * 
- **/
 void extractObjects(pcl::PointCloud<pcl::PointXYZ>::Ptr original_cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud)
 {
   // outputs objects of segmentaion

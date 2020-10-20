@@ -6,7 +6,6 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /PointCloud21
         - /Image1
         - /Pose1
       Splitter Ratio: 0.49882352352142334
@@ -192,10 +191,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.265203595161438
+      Pitch: 0.03520329296588898
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.3785834312438965
+      Yaw: 4.798573970794678
     Saved: ~
 Window Geometry:
   Displays:

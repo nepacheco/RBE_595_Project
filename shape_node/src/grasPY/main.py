@@ -96,7 +96,8 @@ def makePhone():
 
 
 def makeBox(p0, parameters):
-    m = Box(p0, parameters[4], parameters[5], parameters[7])
+    print(parameters)
+    m = Box(p0, parameters[4], parameters[5], parameters[6])
     ax = m.makeMesh()
     grasps = m.planGrasps([parameters[0], parameters[1], parameters[2], parameters[3]])
     m.visualizeGrasps(ax, grasps)
@@ -164,7 +165,7 @@ def listener():
     # run simultaneously.
     rospy.init_node('listener', anonymous=True)
 
-    rospy.Subscriber("/ShapeArray", shapeArray, callback)
+    rospy.Subscriber("/pcl_node/ShapeArray", shapeArray, callback)
 
     # spin() simply keeps python from exiting until this node is stopped
     rospy.spin()
