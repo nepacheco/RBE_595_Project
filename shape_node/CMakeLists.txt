@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(pcl_node)
+project(shape_node)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -8,13 +8,10 @@ project(pcl_node)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  pcl_conversions
-  pcl_ros
-  roscpp
-  sensor_msgs
-  geometry_msgs
+  rospy
+  message_generation
   std_msgs
-  shape_node
+  geometry_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -24,7 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-# catkin_python_setup()
+catkin_python_setup()
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -51,11 +48,10 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+ add_message_files(
+   FILES
+   shapeArray.msg
+ )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -72,10 +68,11 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   sensor_msgs
-# )
+ generate_messages(
+   DEPENDENCIES
+   std_msgs 
+   geometry_msgs
+ )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -107,10 +104,10 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-   # INCLUDE_DIRS include
-   LIBRARIES pcl_node shape_node
-   CATKIN_DEPENDS pcl_conversions pcl_ros roscpp sensor_msgs
-   # DEPENDS system_lib
+#  INCLUDE_DIRS include
+#  LIBRARIES shape_node
+  CATKIN_DEPENDS message_runtime geometry_msgs std_msgs
+#  DEPENDS system_lib
 )
 
 ###########
@@ -120,12 +117,13 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
+# include
   ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/pcl_node.cpp
+#   src/${PROJECT_NAME}/shape_node.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -136,7 +134,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/pcl_node_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/shape_node_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -200,19 +198,10 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_pcl_node.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_shape_node.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-
-
-add_executable(ShapeFinder src/ShapeFinder.cpp)
-add_dependencies(ShapeFinder ${catkin_EXPORTED_TARGETS})
-
-target_link_libraries(ShapeFinder
-  ${catkin_LIBRARIES}
-  ${PCL_LIBRARIES} 
-)

@@ -1,13 +1,14 @@
-from .Shape import Shape
+from Shape import Shape
 from copy import deepcopy
-from src.Shapes.Shape import *
+from Shapes.Shape import *
 from math import *
-from src.Grasp import Grasp
+from Grasp import Grasp
+import os
 
 
 class Sphere(Shape):
     def __init__(self, pose=Pose(), radius=1):
-        super().__init__(pose)
+        Shape.__init__(self, pose)
         self.radius = radius
 
     # This function was formed assuming
@@ -28,8 +29,8 @@ class Sphere(Shape):
          :return: [array of Grasp Objects] List of grasp objects
          """
         graspList = []
-        divisionsOf360 = graspParams[1]  # Must be at least 1
-        graspRotations = graspParams[2]  # Should not be a multiple of 3 and must at least be 1
+        divisionsOf360 = int(graspParams[1])  # Must be at least 1
+        graspRotations = int(graspParams[2])  # Should not be a multiple of 3 and must at least be 1
 
         outerRadius = self.radius + surfaceOffset
         for i in range(divisionsOf360):
@@ -65,7 +66,9 @@ class Sphere(Shape):
         :return: sphere STL
         """
         # display figure and get axes
-        sphere = mesh.Mesh.from_file('STLs/sphere.STL')
+        cur_path = os.path.dirname(os.path.abspath(__file__))
+        new_path = os.path.join(cur_path, '../STLs/sphere.STL')
+        sphere = mesh.Mesh.from_file(new_path)
 
         # move to origin scale points by dimensions
         vecs = sphere.vectors

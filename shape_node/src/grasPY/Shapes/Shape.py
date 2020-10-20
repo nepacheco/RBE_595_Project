@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import numpy
 
-from src.Pose import Pose
+from Pose import Pose
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
@@ -10,7 +10,7 @@ from mpl_toolkits import mplot3d
 
 
 
-class Shape:
+class Shape(object):
 
     def __init__(self, originPose = Pose()):
         self.originPose = originPose    # position of centroid of the object with orientation
