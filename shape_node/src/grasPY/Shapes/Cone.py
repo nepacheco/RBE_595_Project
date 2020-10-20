@@ -6,6 +6,7 @@ from scipy.spatial.transform import Rotation as R
 import numpy as np
 import math
 from Shapes.Shape import *
+import os
 
 class Cone(Shape):
 
@@ -61,9 +62,9 @@ class Cone(Shape):
         :param surfaceOffset:[double] Distance to start the grasp away from the surface
         :return: [list<Grasp>] A list of grasps
         """
-        parallelPlanes = graspParams[0]  # this number should be odd
-        divisionsOf360 = graspParams[1]
-        grasp180Rotations = graspParams[3]
+        parallelPlanes = int(graspParams[0])  # this number should be odd
+        divisionsOf360 = int(graspParams[1])
+        grasp180Rotations = int(graspParams[3])
 
         graspList = []
         theta = math.atan(self.height / self.radius)
@@ -126,7 +127,7 @@ class Cone(Shape):
         :param surfaceOffset:[double] Distance to start the grasp away from the surface
         :return: [list<Grasp>] A list of grasps
         """
-        graspRotations = graspParams[2]
+        graspRotations = int(graspParams[2])
         graspList = []
         for i in range(2):
             # rotation about the y axis only if i == 1
@@ -155,8 +156,8 @@ class Cone(Shape):
         :param surfaceOffset:[double] Distance to start the grasp away from the surface
         :return: [list<Grasp>] A list of grasps
         """
-        divisionsOf360 = graspParams[1]
-        grasp180Rotations = graspParams[3]
+        divisionsOf360 = int(graspParams[1])
+        grasp180Rotations = int(graspParams[3])
 
         graspList = []
         theta = math.atan(self.height / self.radius)
@@ -206,7 +207,9 @@ class Cone(Shape):
         :return: cone STL
         """
         # display figure and get axes
-        cone = mesh.Mesh.from_file('STLs/cone.STL')
+        cur_path = os.path.dirname(os.path.abspath(__file__))
+        new_path = os.path.join(cur_path, '../STLs/cone.STL')
+        cone = mesh.Mesh.from_file(new_path)
 
         # move to origin scale points by dimensions
         vecs = cone.vectors
