@@ -10,7 +10,7 @@ from mpl_toolkits import mplot3d
 
 
 
-class Shape:
+class Shape(object):
 
     def __init__(self, originPose = Pose()):
         self.originPose = originPose    # position of centroid of the object with orientation

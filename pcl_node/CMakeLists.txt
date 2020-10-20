@@ -12,6 +12,9 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_ros
   roscpp
   sensor_msgs
+  geometry_msgs
+  std_msgs
+  shape_node
 )
 
 ## System dependencies are found with CMake's conventions
@@ -105,7 +108,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
    # INCLUDE_DIRS include
-   LIBRARIES pcl_node
+   LIBRARIES pcl_node shape_node
    CATKIN_DEPENDS pcl_conversions pcl_ros roscpp sensor_msgs
    # DEPENDS system_lib
 )
@@ -207,6 +210,7 @@ include_directories(
 
 
 add_executable(ShapeFinder src/ShapeFinder.cpp)
+add_dependencies(ShapeFinder ${catkin_EXPORTED_TARGETS})
 
 target_link_libraries(ShapeFinder
   ${catkin_LIBRARIES}

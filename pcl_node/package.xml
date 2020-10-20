@@ -59,9 +59,11 @@
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>sensor_msgs</build_export_depend>
   <build_depend>libpcl-all-dev</build_depend>
+  <build_depend>shape_node</build_depend>
   <exec_depend>libpcl-all</exec_depend>
   <exec_depend>pcl_conversions</exec_depend>
   <exec_depend>pcl_ros</exec_depend>
+  <exec_depend>shape_node</exec_depend>
   <exec_depend>roscpp</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>libpcl-all</exec_depend>

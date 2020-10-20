@@ -29,9 +29,9 @@ class Pose:
         eulers = np.array([p.roll, p.pitch, p.yaw])     # euler array
 
         rot = R.from_euler('xyz', eulers)       # create rotation matrix from euler angles
-
+    
         # assemble transformation matrix
-        T[0:3, 0:3] = rot.as_matrix()
+        T[0:3, 0:3] = rot.as_dcm()
         T[0, 3] = p.x
         T[1, 3] = p.y
         T[2, 3] = p.z
@@ -47,7 +47,7 @@ class Pose:
         :param T: [np.matrix 4x4] Transformation Matrix
         :return: [Pose] Pose object
         """
-        r = R.from_matrix(T[0:3, 0:3])
+        r = R.from_dcm(T[0:3, 0:3])
         euler_vec = r.as_euler('xyz')
         pose = Pose(T[0][3], T[1][3], T[2][3], euler_vec[0], euler_vec[1], euler_vec[2])
         return pose

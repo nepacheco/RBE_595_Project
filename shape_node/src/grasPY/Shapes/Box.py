@@ -3,12 +3,13 @@ import numpy as np
 from Shapes.Shape import *
 from Grasp import Grasp
 from Pose import Pose
+import os
 
 
 class Box(Shape):
 
     def __init__(self, pose=Pose(), h=0, w=0, l=0):
-        super().__init__(pose)
+        Shape.__init__(self, pose)
         self.height = h
         self.width = w
         self.length = l
@@ -31,8 +32,8 @@ class Box(Shape):
          :return: [array of Grasp Objects] List of grasp objects
          """
         numberCubeSides = 6
-        parallelPlanes = graspParams[0]  # Has to at least one and must be odd
-        grasp180Rotations = graspParams[3]  # has to be a 1 or a 2
+        parallelPlanes = int(graspParams[0])  # Has to at least one and must be odd
+        grasp180Rotations = int(graspParams[3])  # has to be a 1 or a 2
 
         graspList = []
 
@@ -115,7 +116,9 @@ class Box(Shape):
         :return: box STL
         """
         # display figure and get axes
-        box = mesh.Mesh.from_file('STLs/cube.STL')
+        cur_path = os.path.dirname(os.path.abspath(__file__))
+        new_path = os.path.join(cur_path, '../STLs/cube.STL')
+        box = mesh.Mesh.from_file(new_path)
 
         # move to origin scale points by dimensions
         vecs = box.vectors
