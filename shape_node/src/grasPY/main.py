@@ -96,9 +96,9 @@ def makePhone():
 
 
 def makeBox(p0, parameters):
-    m = Box(p0, parameters(4), parameters(5), parameters(6))
+    m = Box(p0, parameters[4], parameters[5], parameters[7])
     ax = m.makeMesh()
-    grasps = m.planGrasps([parameters(0), parameters(1), parameters(2), parameters(3)])
+    grasps = m.planGrasps([parameters[0], parameters[1], parameters[2], parameters[3]])
     m.visualizeGrasps(ax, grasps)
     plt.show()
 
@@ -112,17 +112,17 @@ def makeCylinder(p0, parameters):
 
 
 def makeSphere(p0, parameters):
-    m = Sphere(p0, parameters(7))
+    m = Sphere(p0, parameters[7])
     ax = m.makeMesh()
-    grasps = m.planGrasps([parameters(0), parameters(1), parameters(2), parameters(3)])
+    grasps = m.planGrasps([parameters[0], parameters[1], parameters[2], parameters[3]])
     m.visualizeGrasps(ax, grasps)
     plt.show()
 
 
 def makeCone(p0, parameters):
-    m = Cone(p0, parameters(4), parameters(7))
+    m = Cone(p0, parameters[4], parameters[7])
     ax = m.makeMesh()
-    grasps = m.planGrasps([parameters(0), parameters(1), parameters(2), parameters(3)])
+    grasps = m.planGrasps([parameters[0], parameters[1], parameters[2], parameters[3]])
     m.visualizeGrasps(ax, grasps)
     plt.show()
 

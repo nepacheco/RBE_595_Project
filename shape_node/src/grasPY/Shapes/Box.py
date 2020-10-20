@@ -9,7 +9,7 @@ import os
 class Box(Shape):
 
     def __init__(self, pose=Pose(), h=0, w=0, l=0):
-        super().__init__(pose)
+        Shape.__init__(self, pose)
         self.height = h
         self.width = w
         self.length = l

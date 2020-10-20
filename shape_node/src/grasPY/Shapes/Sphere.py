@@ -8,7 +8,7 @@ import os
 
 class Sphere(Shape):
     def __init__(self, pose=Pose(), radius=1):
-        super().__init__(pose)
+        Shape.__init__(self, pose)
         self.radius = radius
 
     # This function was formed assuming

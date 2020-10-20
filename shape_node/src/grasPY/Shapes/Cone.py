@@ -11,7 +11,7 @@ import os
 class Cone(Shape):
 
     def __init__(self, pose=Pose(), height=0, radius=0):
-        super().__init__(pose)
+        Shape.__init__(self, pose)
         self.height = height
         self.radius = radius
 
